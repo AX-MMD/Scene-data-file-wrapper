@@ -2,13 +2,9 @@ import copy
 import itertools
 import math
 import os
-
-from typing import Any, Dict, List, Tuple, Union
+from dataclasses import dataclass
+from typing import Any, Dict, List, Tuple, Union, cast
 from xml.etree import ElementTree as et
-
-
-class NodeNotFoundError(Exception):
-    pass
 
 
 class InfiniteIterator:
@@ -27,53 +23,67 @@ class InfiniteIterator:
         return value
 
 
+def keyframe_get(keyframe: et.Element, key: str) -> float:
+    return float(cast(str, keyframe.get(key)))
+
+
 class KeyframeReference:
     def __init__(self, keyframe: et.Element):
         self.ref_node = keyframe
-        self.time = float(keyframe.get("time"))
-        self.axis = None
-        self.out_direction = None
-        self.estimated_pull_out = None
-        self.valueX = float(keyframe.get("valueX"))
-        self.valueY = float(keyframe.get("valueY"))
-        self.valueZ = float(keyframe.get("valueZ"))
+        self.time = keyframe_get(keyframe, "time")
+        self.valueX = keyframe_get(keyframe, "valueX")
+        self.valueY = keyframe_get(keyframe, "valueY")
+        self.valueZ = keyframe_get(keyframe, "valueZ")
 
     @property
     def value(self):
         return getattr(self, self.axis) if self.axis else None
-    
+
+
+@dataclass
+class DirectionData:
+    axis: str
+    out_direction: float
+    estimated_pull_out: float
+
 
 def convert_string_to_nested_list(s):
-    parts = s.split('.')
+    parts = s.split(".")
     nested_list = None
     for part in reversed(parts):
         nested_list = ["alias" if nested_list is None else "name", part, nested_list]
     return nested_list
 
 
+class NodeNotFoundError(Exception):
+    pass
+
+
 def find_interpolable(tree: et.ElementTree, target: str):
-        node = tree.getroot()
-        tag, value, child = convert_string_to_nested_list(target)
-        while child is not None:
-            node = node.find(f"""interpolableGroup[@{tag}='{value}']""")
-            if node is None:
-                raise NodeNotFoundError(f"Node not found: interpolableGroup[@{tag}='{value}']")
-            tag, value, child = child
-
-        node = node.find(f"""interpolable[@{tag}='{value}']""")
+    node = tree.getroot()
+    tag, value, child = convert_string_to_nested_list(target)
+    while child is not None:
+        node = node.find(f"""interpolableGroup[@{tag}='{value}']""")
         if node is None:
-            raise NodeNotFoundError(f"Node not found: interpolable[@{tag}='{value}']")
+            raise NodeNotFoundError(
+                f"Node not found: interpolableGroup[@{tag}='{value}']"
+            )
+        tag, value, child = child
 
-        return node
+    node = node.find(f"""interpolable[@{tag}='{value}']""")
+    if node is None:
+        raise NodeNotFoundError(f"Node not found: interpolable[@{tag}='{value}']")
+
+    return node
 
 
 def convert_KKtime_to_seconds(time_str: str) -> float:
     """Convert a time string of format 'MM:SS.SS' to seconds in float"""
-    minutes, seconds_fraction = time_str.split(':')
-    seconds, fraction = seconds_fraction.split('.')
+    minutes, seconds_fraction = time_str.split(":")
+    seconds, fraction = seconds_fraction.split(".")
     total_seconds = int(minutes) * 60 + int(seconds) + float(f"0.{fraction}")
     return total_seconds
-    
+
 
 class PlapGenerator:
     """
@@ -96,7 +106,7 @@ class PlapGenerator:
     pattern_string : str, optional
         The pattern string to generate the plap sequence. Default is "V".
     plap_folder_names : list of str, optional
-        List of names of the folders to use (Those containing the sound items). 
+        List of names of the folders to use (Those containing the sound items).
         Default is ["Plap1", "Plap2", "Plap3", "Plap4"].
     template_path : str, optional
         Path to the template XML file. Default is "template.xml".
@@ -115,21 +125,21 @@ class PlapGenerator:
     valid_patern_chars = ["W", "M", "V", "A", "/", "\\"]
 
     def __init__(
-            self, 
-            interpolable_path: str, 
-            ref_keyframe_time: str, 
-            delay: float = 0.0,
-            min_pull_out: float = 0.2,
-            min_pull_in: float = 0.2,
-            time_ranges: List[Tuple[str, str]] = [],
-            pattern_string: str = "V", 
-            plap_folder_names: List[str] = ["Plap1", "Plap2", "Plap3", "Plap4"],
-            template_path: str = "template.xml"
-        ):
+        self,
+        interpolable_path: str,
+        ref_keyframe_time: str,
+        delay: float = 0.0,
+        min_pull_out: float = 0.2,
+        min_pull_in: float = 0.2,
+        time_ranges: List[Tuple[str, str]] = [],
+        pattern_string: str = "V",
+        plap_folder_names: List[str] = ["Plap1", "Plap2", "Plap3", "Plap4"],
+        template_path: str = "template.xml",
+    ):
         # config file params ###
         self.interpolable_path = interpolable_path
         self.ref_keyframe_time = ref_keyframe_time
-        self.delay = float(delay) # Just in case we receive a string
+        self.delay = float(delay)  # Just in case we receive a string
         self.min_pull_out = float(min_pull_out)
         self.min_pull_in = float(min_pull_in)
         self.time_ranges = time_ranges
@@ -138,8 +148,8 @@ class PlapGenerator:
         self.plap_count = len(plap_folder_names)
         self.template_path = template_path
         # config file params END ###
-
-        self.patterns = {
+        # fmt: off
+        self.patterns: Dict[str, List[int]] = {
             "W": [i for i in range(self.plap_count)] \
                 + [i for i in range(self.plap_count - 2, int(math.ceil(self.plap_count / 2)) - 1, -1)] \
                 + [i for i in range(int(math.ceil(self.plap_count / 2)) - 1, self.plap_count - 1)] \
@@ -153,41 +163,51 @@ class PlapGenerator:
             "/": [i for i in range(self.plap_count - 1, -1, -1)],
             "\\": [i for i in range(self.plap_count)],
         }
+        # fmt: on
         for pattern_char in self.pattern_string:
             if pattern_char not in self.valid_patern_chars:
-                raise ValueError(f"Invalid pattern {self.pattern_string}, valid characters are {', '.format(self.valid_patern_chars)} or a combination of them.")
-        
+                raise ValueError(
+                    f"Invalid pattern {self.pattern_string}, valid characters are {', '.join(self.valid_patern_chars)} or a combination of them."
+                )
+
         self.sequence = self.generate_sequence(pattern_string)
 
     @property
     def ref_keyframe_time(self):
         return self._ref_keyframe_time
-    
+
     @ref_keyframe_time.setter
     def ref_keyframe_time(self, value):
         self._ref_keyframe_time = value
         self._ref_kf_seconds = self._std_time(convert_KKtime_to_seconds(value))
 
-    def get_time_ranges_sec(self):
+    def get_time_ranges_sec(self) -> List[Tuple[float, float]]:
         if self.time_ranges:
-            return [(convert_KKtime_to_seconds(tg[0]), convert_KKtime_to_seconds(tg[1])) for tg in self.time_ranges]
+            return [
+                (convert_KKtime_to_seconds(tg[0]), convert_KKtime_to_seconds(tg[1]))
+                for tg in self.time_ranges
+            ]
         else:
             return [(0.0, math.inf)]
 
     def generate_plap_xml(self, timeline_xml_tree: et.ElementTree):
         # Create the base plap nodes from template
-        tree = et.parse(os.path.join(os.path.dirname(os.path.abspath(__file__)), self.template_path))
+        tree = et.parse(
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), self.template_path)
+        )
 
         sfx_node = tree.getroot().find(f"""interpolableGroup[@name='SFX']""")
         if sfx_node is None:
-            raise NodeNotFoundError(f"interpolableGroup[@name='SFX'] missing from the template.")
-        
-        base_plap = sfx_node.find(
-                f"""interpolable[@alias='Plap']"""
+            raise NodeNotFoundError(
+                f"interpolableGroup[@name='SFX'] missing from the template."
             )
+
+        base_plap = sfx_node.find(f"""interpolable[@alias='Plap']""")
         if base_plap is None:
-            raise NodeNotFoundError(f"interpolable[@alias='Plap'] missing from the template.")
-        
+            raise NodeNotFoundError(
+                f"interpolable[@alias='Plap'] missing from the template."
+            )
+
         base_keyframe = base_plap.find("keyframe")
         if base_keyframe is None:
             raise NodeNotFoundError(f"<keyframe> is missing in the template.")
@@ -204,17 +224,17 @@ class PlapGenerator:
 
         # Create the patern
         sequence = self.generate_sequence(self.pattern_string)
-        
+
         # Get the rythm from source single_file, will use parameters from config.json to locate the node
         node = find_interpolable(timeline_xml_tree, self.interpolable_path)
         node_list = list(node)
 
         # We find the reference keyframe and directionnal information
-        reference = self.get_reference(node_list)
-        
+        reference, direction = self.get_reference(node_list)
+
         keyframe_times = []
         did_plap = False
-        minimum_pull_out = self.min_pull_out * reference.estimated_pull_out
+        minimum_pull_out = self.min_pull_out * direction.estimated_pull_out
         for time_start, time_end in self.get_time_ranges_sec():
             keyframes = node_list
             max_index = len(keyframes) - 1
@@ -236,18 +256,23 @@ class PlapGenerator:
                 if time > time_end:
                     # Reached the end of the time range
                     break
-                elif did_plap is True and abs(float(keyframe.get(reference.axis)) - reference.value) > minimum_pull_out:
+                elif (
+                    did_plap is True
+                    and abs(keyframe_get(keyframe, direction.axis) - reference.value)
+                    > minimum_pull_out
+                ):
                     # Only re-enable plapping after a minimum distance is reached
                     did_plap = False
                 elif not did_plap and i < max_index:
                     # Check if the keyframe is close enough to the reference keyframe value
                     # TODO: probably more work to be done here
                     if (
-                        reference.out_direction == -1 
-                        and float(keyframe.get(reference.axis)) <= (reference.value + self.min_pull_in * reference.value)
-                        or 
-                        reference.out_direction == 1 
-                        and float(keyframe.get(reference.axis)) >= (reference.value - self.min_pull_in * reference.value) 
+                        direction.out_direction == -1
+                        and keyframe_get(keyframe, direction.axis)
+                        <= (reference.value + self.min_pull_in * reference.value)
+                        or direction.out_direction == 1
+                        and keyframe_get(keyframe, direction.axis)
+                        >= (reference.value - self.min_pull_in * reference.value)
                     ):
                         keyframe_times.append(time)
                         did_plap = True
@@ -257,8 +282,8 @@ class PlapGenerator:
             plap = copy.deepcopy(base_plap)
             plap.set("alias", f"{plap_name}")
             plap.set("objectIndex", f"{plap.get('objectIndex')}{i + 1}")
-            sfx_node.append(plap)     
-        
+            sfx_node.append(plap)
+
         # Generate the plap keyframes
         plaps = list(sfx_node)
         pattern_iter = InfiniteIterator(sequence)
@@ -275,7 +300,7 @@ class PlapGenerator:
             plap.append(new_keyframe)
 
         return sfx_node, len(keyframe_times), (keyframe_times[0], keyframe_times[-1])
-    
+
     def generate_sequence(self, pattern_string: str):
         last_index = len(pattern_string) - 1
         sequence = []
@@ -285,17 +310,19 @@ class PlapGenerator:
             if p != last_index:
                 sequence.append(pattern_chunk[0])
 
-        return sequence                                                                                                                                                                                                                                          
+        return sequence
 
     def is_reference_time(self, time: float):
         return time + 0.00001 >= self._ref_kf_seconds >= time - 0.00001
 
-    def get_reference(self, node_list: List[et.Element]) -> KeyframeReference:
+    def get_reference(
+        self, node_list: List[et.Element]
+    ) -> Tuple[KeyframeReference, DirectionData]:
         # We itterate instead of an exact search because the "time" attribute can have a higher precision than what the user can provide.
         reference = None
-        ref_index = None
+        ref_index = 0
         for i, keyframe in enumerate(node_list):
-            time = self._std_time(keyframe.get("time"))
+            time = self._std_time(keyframe.get("time", 0.0))
             if self.is_reference_time(time):
                 ref_index = i
                 reference = KeyframeReference(keyframe)
@@ -313,29 +340,29 @@ class PlapGenerator:
             except IndexError:
                 raise IndexError("The reference keyframe cannot be the last keyframe.")
 
-            x = float(next_frame.get("valueX")) - reference.valueX
-            y = float(next_frame.get("valueY")) - reference.valueY
-            z = float(next_frame.get("valueZ")) - reference.valueZ
+            x = keyframe_get(next_frame, "valueX") - reference.valueX
+            y = keyframe_get(next_frame, "valueY") - reference.valueY
+            z = keyframe_get(next_frame, "valueZ") - reference.valueZ
             if abs(z) < abs(x) > abs(y):
-                reference.axis = "valueX"
-                reference.out_direction = x / abs(x)
+                axis = "valueX"
+                out_direction = x / abs(x)
             elif abs(z) < abs(y) > abs(x):
-                reference.axis = "valueY"
-                reference.out_direction = y / abs(y)
+                axis = "valueY"
+                out_direction = y / abs(y)
             else:
-                reference.axis = "valueZ"
-                reference.out_direction = z / abs(z)
+                axis = "valueZ"
+                out_direction = z / abs(z)
 
             # We then try and estimate the pull out distance by taking the biggest difference between the reference keyframe and (up too) the next 5 keyframes.
-            reference.estimated_pull_out = max(
-                abs(float(node_list[j].get(reference.axis)) - reference.value) 
+            estimated_pull_out = max(
+                abs(keyframe_get(node_list[j], axis) - reference.value)
                 for j in range(ref_index, min(ref_index + 6, len(node_list)))
             )
 
-        return reference
+        return reference, DirectionData(axis, out_direction, estimated_pull_out)
 
-    def _get_pattern_for_char(self, pattern_char: str) -> list:
-        return self.patterns.get(pattern_char)
-        
-    def _std_time(self, time: Union[int, float]) -> str:
+    def _get_pattern_for_char(self, pattern_char: str) -> List[int]:
+        return self.patterns[pattern_char]
+
+    def _std_time(self, time: Union[str, int, float]) -> float:
         return round(float(time), 5)
