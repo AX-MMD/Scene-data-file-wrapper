@@ -1,6 +1,3 @@
-
-
-
 import copy
 import itertools
 import math
