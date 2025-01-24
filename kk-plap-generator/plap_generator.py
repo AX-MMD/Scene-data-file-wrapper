@@ -3,7 +3,7 @@ import itertools
 import math
 import os
 from dataclasses import dataclass
-from typing import Any, Dict, List, Tuple, Union, cast
+from typing import Dict, List, Tuple, Union, cast
 from xml.etree import ElementTree as et
 
 
@@ -196,21 +196,21 @@ class PlapGenerator:
             os.path.join(os.path.dirname(os.path.abspath(__file__)), self.template_path)
         )
 
-        sfx_node = tree.getroot().find(f"""interpolableGroup[@name='SFX']""")
+        sfx_node = tree.getroot().find("""interpolableGroup[@name='SFX']""")
         if sfx_node is None:
             raise NodeNotFoundError(
-                f"interpolableGroup[@name='SFX'] missing from the template."
+                "interpolableGroup[@name='SFX'] missing from the template."
             )
 
-        base_plap = sfx_node.find(f"""interpolable[@alias='Plap']""")
+        base_plap = sfx_node.find("""interpolable[@alias='Plap']""")
         if base_plap is None:
             raise NodeNotFoundError(
-                f"interpolable[@alias='Plap'] missing from the template."
+                "interpolable[@alias='Plap'] missing from the template."
             )
 
         base_keyframe = base_plap.find("keyframe")
         if base_keyframe is None:
-            raise NodeNotFoundError(f"<keyframe> is missing in the template.")
+            raise NodeNotFoundError("<keyframe> is missing in the template.")
         else:
             base_keyframe.set("value", "false")
 

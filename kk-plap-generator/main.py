@@ -1,5 +1,3 @@
-import copy
-import math
 import os
 import sys
 import traceback
@@ -69,7 +67,7 @@ if __name__ == "__main__":
             tree.write(filename)
             print(f"Generated '{filename}'")
 
-    except Exception as e:
+    except Exception:
         traceback.print_exc()
     finally:
         input("Press Enter to exit...")

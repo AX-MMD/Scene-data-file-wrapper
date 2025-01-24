@@ -13,7 +13,8 @@ dependencies = [
     "isort (>=5.13.2,<6.0.0)",
     "flakeheaven (>=3.3.0,<4.0.0)",
     "mypy (>=1.14.1,<2.0.0)",
-    "types-toml (>=0.10.8.20240310,<0.11.0.0)"
+    "types-toml (>=0.10.8.20240310,<0.11.0.0)",
+    "ruff (>=0.9.3,<0.10.0)"
 ]
 
 
@@ -26,15 +27,12 @@ profile = "black"
 src_paths = "tiguidou"
 combine_as_imports = true
 
-[tool.flakeheaven]
-# make output nice
-max_line_length = 90
+[tool.ruff]
+line-length = 90
 
-[tool.flakeheaven.plugins]
-pyflakes = ["+*", "-E203", "-W503", "-F811", "-E501", "-E266", "-F723"]
-pycodestyle = ["+*", "-E203", "-W503", "-F811", "-E501", "-E266", "-F723"]
-pylint = ["+*"]
-mccabe = ["+*"]
+[tool.ruff.lint]
+select = ["I", "F", "E", "W"]
+ignore = ["E203", "F811", "E501", "E266"]
 
 [tool.black]
 line-length = 90

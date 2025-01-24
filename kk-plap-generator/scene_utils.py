@@ -25,7 +25,6 @@ class SceneDataException(Exception):
 
 
 class SceneData:
-
     class ContentError(SceneDataException):
         pass
 
@@ -61,7 +60,7 @@ class SceneData:
             with open(file_path, "rb") as filekk:
                 self._content = filekk.read()
         except MemoryError:
-            raise SceneData.MemoryError(f"File is to big, file.read() failed")
+            raise SceneData.MemoryError("File is to big, file.read() failed")
 
         if not self._is_scene_data():
             raise SceneData.ContentError("Not a scene data file")
@@ -77,7 +76,7 @@ class SceneData:
             return self._content.decode("utf-8", errors="ignore")
         except MemoryError:
             raise SceneData.MemoryError(
-                f"File is to big, content.decode('utf-8', errors='ignore') failed"
+                "File is to big, content.decode('utf-8', errors='ignore') failed"
             )
 
     @property
@@ -90,7 +89,6 @@ class SceneData:
 
     @duration.setter
     def duration(self, value: float):
-
         raise NotImplementedError("Modification of the timeline is not supported (yet)")
 
         if not self.has_timeline():
