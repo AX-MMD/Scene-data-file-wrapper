@@ -1,0 +1,28 @@
+V patern 1-2-3-2-1, enable the +s for extra intensity
+
+-- Plap1
+PistonA1 +	-3.725 Y Pos
+PistonA1	-3.725 Y Pos
+PistonD1	-5.000 Y Pos
+WaterPiston12	-50.00 Y Pos
+
+-- Plap2
+PistonC1 +	-3.725 Y Pos
+PistonA2	-3.725 Y Pos
+PistonD1	-5.000 Y Pos
+
+-- Plap3
+PistonB1 +	-3.725 Y Pos
+PistonB1	-3.725 Y Pos
+PistonD1	-5.000 Y Pos
+
+-- Plap4
+PistonC1 +	-3.725 Y Pos
+PistonA3	-3.725 Y Pos
+PistonD1	-5.000 Y Pos
+WaterPiston12	-50.00 Y Pos
+
+
+(optional 1 per plap with ~0.012 delay)
+-- PostPlap
+PistonD3
