@@ -6,83 +6,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Tuple, Union, cast
 from xml.etree import ElementTree as et
 
-
-class InfiniteIterator:
-    def __init__(self, data):
-        self.data = data
-        self.index = 0
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        if not self.data:
-            raise StopIteration("The data list is empty.")
-        value = self.data[self.index]
-        self.index = (self.index + 1) % len(self.data)
-        return value
-
-
-def keyframe_get(keyframe: et.Element, key: str) -> float:
-    return float(cast(str, keyframe.get(key)))
-
-
-@dataclass
-class Keyframe:
-    node: et.Element
-    time: float
-    valueX: float
-    valueY: float
-    valueZ: float
-
-
-@dataclass
-class KeyframeReference(Keyframe):
-    axis: str
-    out_direction: float
-    estimated_pull_out: float
-
-    @property
-    def value(self):
-        return getattr(self, self.axis)
-
-
-def convert_string_to_nested_list(s):
-    parts = s.split(".")
-    nested_list = None
-    for part in reversed(parts):
-        nested_list = ["alias" if nested_list is None else "name", part, nested_list]
-    return nested_list
-
-
-class NodeNotFoundError(Exception):
-    pass
-
-
-def find_interpolable(tree: et.ElementTree, target: str):
-    node = tree.getroot()
-    tag, value, child = convert_string_to_nested_list(target)
-    while child is not None:
-        node = node.find(f"""interpolableGroup[@{tag}='{value}']""")
-        if node is None:
-            raise NodeNotFoundError(
-                f"Node not found: interpolableGroup[@{tag}='{value}']"
-            )
-        tag, value, child = child
-
-    node = node.find(f"""interpolable[@{tag}='{value}']""")
-    if node is None:
-        raise NodeNotFoundError(f"Node not found: interpolable[@{tag}='{value}']")
-
-    return node
-
-
-def convert_KKtime_to_seconds(time_str: str) -> float:
-    """Convert a time string of format 'MM:SS.SS' to seconds in float"""
-    minutes, seconds_fraction = time_str.split(":")
-    seconds, fraction = seconds_fraction.split(".")
-    total_seconds = int(minutes) * 60 + int(seconds) + float(f"0.{fraction}")
-    return total_seconds
+from kk_plap_generator import settings
 
 
 class PlapGenerator:
@@ -95,8 +19,8 @@ class PlapGenerator:
         The path to the interpolable to use as reference for the SFX.
     ref_keyframe_time : str
         The reference keyframe time where the subject is fully inserted.
-    delay : float, optional
-        Delay in seconds, positive or negative, to adjust the timing of the SFX. Default is 0.0.
+    offset : float, optional
+        Offset in seconds, positive or negative, to adjust the timing of the SFX. Default is 0.0.
     min_pull_out : float, optional
         Minimum pull-out distance percent (0.0 to 1.0) before the next plap can register. Default is 0.2.
     min_pull_in : float, optional
@@ -109,7 +33,7 @@ class PlapGenerator:
         List of names of the folders to use (Those containing the sound items).
         Default is ["Plap1", "Plap2", "Plap3", "Plap4"].
     template_path : str, optional
-        Path to the template XML file. Default is "template.xml".
+        Path to the template XML file.
 
     Attributes
     ----------
@@ -128,18 +52,18 @@ class PlapGenerator:
         self,
         interpolable_path: str,
         ref_keyframe_time: str,
-        delay: float = 0.0,
+        offset: float = 0.0,
         min_pull_out: float = 0.2,
         min_pull_in: float = 0.2,
         time_ranges: List[Tuple[str, str]] = [],
         pattern_string: str = "V",
         plap_folder_names: List[str] = ["Plap1", "Plap2", "Plap3", "Plap4"],
-        template_path: str = "template.xml",
+        template_path: str = settings.TEMPLATE_FILE,
     ):
         # config file params START ###
         self.interpolable_path = interpolable_path
         self.ref_keyframe_time = ref_keyframe_time
-        self.delay = float(delay)  # Just in case we receive a string
+        self.offset = float(offset)  # Just in case we receive a string
         self.min_pull_out = float(min_pull_out)
         self.min_pull_in = float(min_pull_in)
         self.time_ranges = time_ranges
@@ -293,11 +217,11 @@ class PlapGenerator:
             i = next(pattern_iter)
             plap = plaps[i]
             mute_keyframe = copy.deepcopy(base_keyframe)
-            mute_keyframe.set("time", str(time - 0.1 + self.delay))
+            mute_keyframe.set("time", str(time - 0.1 + self.offset))
             mute_keyframe.set("value", "false")
             plap.append(mute_keyframe)
             new_keyframe = copy.deepcopy(base_keyframe)
-            new_keyframe.set("time", str(time + self.delay))
+            new_keyframe.set("time", str(time + self.offset))
             new_keyframe.set("value", "true")
             plap.append(new_keyframe)
 
@@ -317,7 +241,7 @@ class PlapGenerator:
     def is_reference_time(self, time: float):
         return time + 0.00001 >= self._ref_kf_seconds >= time - 0.00001
 
-    def get_reference(self, node_list: List[et.Element]) -> KeyframeReference:
+    def get_reference(self, node_list: List[et.Element]) -> "KeyframeReference":
         # We itterate instead of an exact search because the "time" attribute can have a higher precision than what the user can provide.
         reference = None
         ref_index = 0
@@ -381,3 +305,81 @@ class PlapGenerator:
 
     def _std_time(self, time: Union[str, int, float]) -> float:
         return round(float(time), 5)
+
+
+class InfiniteIterator:
+    def __init__(self, data):
+        self.data = data
+        self.index = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if not self.data:
+            raise StopIteration("The data list is empty.")
+        value = self.data[self.index]
+        self.index = (self.index + 1) % len(self.data)
+        return value
+
+
+def keyframe_get(keyframe: et.Element, key: str) -> float:
+    return float(cast(str, keyframe.get(key)))
+
+
+@dataclass
+class Keyframe:
+    node: et.Element
+    time: float
+    valueX: float
+    valueY: float
+    valueZ: float
+
+
+@dataclass
+class KeyframeReference(Keyframe):
+    axis: str
+    out_direction: float
+    estimated_pull_out: float
+
+    @property
+    def value(self):
+        return getattr(self, self.axis)
+
+
+class NodeNotFoundError(Exception):
+    pass
+
+
+def find_interpolable(tree: et.ElementTree, target: str):
+    node = tree.getroot()
+    tag, value, child = convert_string_to_nested_list(target)
+    while child is not None:
+        node = node.find(f"""interpolableGroup[@{tag}='{value}']""")
+        if node is None:
+            raise NodeNotFoundError(
+                f"Node not found: interpolableGroup[@{tag}='{value}']"
+            )
+        tag, value, child = child
+
+    node = node.find(f"""interpolable[@{tag}='{value}']""")
+    if node is None:
+        raise NodeNotFoundError(f"Node not found: interpolable[@{tag}='{value}']")
+
+    return node
+
+
+def convert_string_to_nested_list(s):
+    parts = s.split(".")
+    nested_list = None
+    for part in reversed(parts):
+        nested_list = ["alias" if nested_list is None else "name", part, nested_list]
+    return nested_list
+
+
+def convert_KKtime_to_seconds(time_str: str) -> float:
+    """Convert a time string of format 'MM:SS.SS' to seconds in float"""
+    minutes, seconds_fraction = time_str.split(":")
+    seconds, fraction = seconds_fraction.split(".")
+    total_seconds = int(minutes) * 60 + int(seconds) + float(f"0.{fraction}")
+    return total_seconds

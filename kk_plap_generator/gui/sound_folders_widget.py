@@ -1,11 +1,10 @@
 import tkinter as tk
-from tkinter import simpledialog
 import typing
+from tkinter import simpledialog
 
-from kk_plap_generator.plap_generator import PlapGenerator
-
-if typing.TYPE_CHECKING:    
+if typing.TYPE_CHECKING:
     from kk_plap_generator.gui.main_menu import PlapUI
+
 
 class SoundFoldersWidget:
     def __init__(self, app: "PlapUI", masterframe):
@@ -28,12 +27,8 @@ class SoundFoldersWidget:
         )
         self.sound_folders_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        self.sound_folders_listbox.config(
-            yscrollcommand=self.sound_folders_scrollbar.set
-        )
-        self.sound_folders_scrollbar.config(
-            command=self.sound_folders_listbox.yview
-        )
+        self.sound_folders_listbox.config(yscrollcommand=self.sound_folders_scrollbar.set)
+        self.sound_folders_scrollbar.config(command=self.sound_folders_listbox.yview)
 
         self.update()
 
@@ -53,9 +48,11 @@ class SoundFoldersWidget:
         self.sound_folders_listbox.delete(0, tk.END)
         for name in self.store["plap_folder_names"]:
             self.sound_folders_listbox.insert(tk.END, name)
-    
+
     def add_sound_folder_name(self):
-        name = simpledialog.askstring("Input", "Enter folder name:", parent=self.app.master)
+        name = simpledialog.askstring(
+            "Input", "Enter folder name:", parent=self.app.master
+        )
         if name:
             self.store["plap_folder_names"].append(name)
             self.update()

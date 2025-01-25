@@ -1,27 +1,23 @@
-import os
-import re
 import tkinter as tk
-from tkinter import filedialog, messagebox, simpledialog
+from tkinter import messagebox
 
-import toml
 import tkinterdnd2
+import toml
 
 from kk_plap_generator import settings
+from kk_plap_generator.generator.utils import generate_plaps
 from kk_plap_generator.gui.dnd_widget import DnDWidget
 from kk_plap_generator.gui.ref_interpolable_widget import RefInterpolableWidget
 from kk_plap_generator.gui.seq_adjustment_widget import SeqAdjustmentWidget
 from kk_plap_generator.gui.sound_folders_widget import SoundFoldersWidget
 from kk_plap_generator.gui.sound_pattern_widget import SoundPatternWidget
 from kk_plap_generator.gui.time_ranges_widget import TimeRangesWidget
-from kk_plap_generator.gui.validators import validate_offset, validate_time
-from kk_plap_generator.plap_generator import PlapGenerator
 
 
 class PlapUI(tk.Frame):
     def __init__(self, master=None, config_path=settings.CONFIG_FILE):
         super().__init__(master)
         self.master = master
-        self.single_file = None
         self.config_path: str = config_path
         self.plap_config = self.load_config()
         self.store = self.plap_config.get("plap_group")[0]
@@ -52,6 +48,15 @@ class PlapUI(tk.Frame):
 
         with open(self.config_path, "w") as f:
             toml.dump(self.plap_config, f)
+
+    def generate_plaps(self):
+        if not self.store.get("ref_single_file_path"):
+            messagebox.showerror("Error", "Please select a reference file")
+        else:
+            try:
+                generate_plaps(self.store["ref_single_file_path"])
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
 
     def update_widgets(self):
         self.ref_interpolable_widget.update()
@@ -116,9 +121,11 @@ class PlapUI(tk.Frame):
         screen_height = root.winfo_screenheight()
         window_width = max(640, min(854, screen_width // 3))
         window_height = max(360, min(480, screen_height // 3))
+        root.title("PLAP Generator")
+        root.minsize(600, 360)
         root.geometry(f"{window_width}x{window_height}")
         return root
-    
+
     @classmethod
     def run(cls):
         app = cls(master=cls.default_config())
