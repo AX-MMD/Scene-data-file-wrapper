@@ -35,9 +35,9 @@ ref_keyframe_time = "00:00.000"
 ###############################################################################
 
 ### CUSTOMIZATION #############################################################
-# Delay in seconds, in case you don't want the sfx to be timed exactly with the 
+# Offset in seconds, in case you don't want the sfx to be timed exactly with the 
 # reference keyframes. Can be positive or negative.
-delay = 0.0
+offset = 0.0
 
 # Minimum percent distance (0.0 to 1.0) before re-enabling plaps.
 # Prevents spam if the subject is making micro moves when fully inserted.
