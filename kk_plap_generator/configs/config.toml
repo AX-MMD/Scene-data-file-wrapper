@@ -1,10 +1,10 @@
 [[plap_group]]
-plap_folder_names = [ "Plap1", "Plap4", "lol1", "we",]
-interpolable_path = "main.B Rotation (cf_j_waist02)1"
-ref_keyframe_time = "00:10.4521"
-offset = 1.03
-min_pull_out = 0.41
-min_pull_in = 0.69
+plap_folder_names = [ "Plap1", "Plap2", "Plap3", "Plap4"]
+interpolable_path = "main.B Rotation (cf_j_waist02)"
+ref_keyframe_time = "00:00.202653855"
+offset = 0.0
+min_pull_out = 0.2
+min_pull_in = 0.2
 time_ranges = []
-pattern_string = "WAW"
+pattern_string = "V"
 
