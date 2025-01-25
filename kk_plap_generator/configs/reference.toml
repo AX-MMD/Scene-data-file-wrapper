@@ -30,7 +30,7 @@ plap_folder_names = ["Plap1", "Plap2", "Plap3", "Plap4"]
 interpolable_path = "main.B Rotation (cf_j_waist02)"
 
 # Choose a keyframe where the subject is fully inserted
-ref_keyframe_time = "00:02.454"
+ref_keyframe_time = "00:00.000"
 
 ###############################################################################
 
@@ -51,7 +51,7 @@ min_pull_in = 0.20
 # You can have a different start point, end point or multiple.
 # Exemple with 2 ranges: [["00:01.5", "00:05.0"], ["00:10.5", "00:15.0"]]
 # If you give a custom range, you must put both a start and end point.
-time_ranges = [["00:00.00"]]
+time_ranges = []
 
 # V pattern goes from first folder to last to first repetively (1-2-3-4-3-2-1)
 # W pattern is first -> last -> halway to first -> last -> first
