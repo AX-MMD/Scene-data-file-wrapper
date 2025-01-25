@@ -1,6 +1,6 @@
 import tkinter as tk
-from tkinter import font, messagebox
 import traceback
+from tkinter import font, messagebox
 
 import tkinterdnd2
 import toml
@@ -17,7 +17,12 @@ from kk_plap_generator.gui.time_ranges_widget import TimeRangesWidget
 
 
 class PlapUI(tk.Frame):
-    def __init__(self, master=None, config_path=settings.CONFIG_FILE, default_config_path=settings.DEFAULT_CONFIG_FILE):
+    def __init__(
+        self,
+        master=None,
+        config_path=settings.CONFIG_FILE,
+        default_config_path=settings.DEFAULT_CONFIG_FILE,
+    ):
         super().__init__(master)
         self.master = master
         self.config_path: str = config_path
@@ -35,7 +40,7 @@ class PlapUI(tk.Frame):
                 return toml.load(f)
         with open(self.config_path, "r") as f:
             return toml.load(f)
-        
+
     def update_widgets(self):
         self.ref_interpolable_widget.update()
         self.seq_adjustment_widget.update()
@@ -97,17 +102,23 @@ class PlapUI(tk.Frame):
         self.bottom_left_frame.grid_columnconfigure(2, weight=1)
 
         # Reset Button
-        self.reset_button = tk.Button(self.bottom_left_frame, text="Reset ↺", command=self.reset_button_action)
+        self.reset_button = tk.Button(
+            self.bottom_left_frame, text="Reset ↺", command=self.reset_button_action
+        )
         self.reset_button.grid(row=0, column=0, sticky="nsew")
 
         # Generate Button
-        self.generate_button = tk.Button(self.bottom_left_frame, text="▶", command=self.generate_plaps)
+        self.generate_button = tk.Button(
+            self.bottom_left_frame, text="▶", command=self.generate_plaps
+        )
         self.generate_button.grid(row=0, column=1, sticky="nsew")
 
         # Save Button
-        self.save_button = tk.Button(self.bottom_left_frame, text="Save 💾", command=self.save_button_action)
+        self.save_button = tk.Button(
+            self.bottom_left_frame, text="Save 💾", command=self.save_button_action
+        )
         self.save_button.grid(row=0, column=2, sticky="nsew")
-        
+
     def reset_button_action(self):
         self.plap_config = self.load_config(use_default=True)
         self.store = self.plap_config.get("plap_group")[0]
@@ -139,11 +150,12 @@ class PlapUI(tk.Frame):
         else:
             try:
                 print(self.plap_config)
-                output = generate_plaps(self.dnd_widget.get_single_file(), self.plap_config['plap_group'])
+                output = generate_plaps(
+                    self.dnd_widget.get_single_file(), self.plap_config["plap_group"]
+                )
                 CustomMessageBox(self, "Output", "\n".join(output))
-            except Exception as e:
+            except Exception:
                 messagebox.showerror("Error", traceback.format_exc())
-        
 
     @classmethod
     def default_config(cls) -> tkinterdnd2.Tk:

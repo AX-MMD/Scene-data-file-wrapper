@@ -24,9 +24,7 @@ class SoundPatternWidget:
 
         self.top_left_frame = tk.Frame(self.top_frame)
         self.top_left_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
-        self.pattern_string_label = tk.Label(
-            self.top_left_frame, text="Sound Pattern"
-        )
+        self.pattern_string_label = tk.Label(self.top_left_frame, text="Sound Pattern")
         self.pattern_string_label.pack()
 
         self.top_right_frame = InfoMessageFrame(self.top_frame, "Sound Pattern info")

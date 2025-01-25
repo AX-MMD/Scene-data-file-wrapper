@@ -1,6 +1,5 @@
 import tkinter as tk
 import typing
-from tkinter import messagebox
 
 from kk_plap_generator.gui.info_message import InfoMessageFrame
 from kk_plap_generator.gui.validators import validate_time
@@ -31,7 +30,9 @@ class RefInterpolableWidget:
         )
         self.ref_keyframe_time_label.pack()
 
-        self.top_right_frame = InfoMessageFrame(self.top_frame, "Reference Interpolable info")
+        self.top_right_frame = InfoMessageFrame(
+            self.top_frame, "Reference Interpolable info"
+        )
 
         # Reference keyframe Time
         self.time_frame = tk.Frame(self.ref_keyframe_time_frame)

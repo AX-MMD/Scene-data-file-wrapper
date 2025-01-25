@@ -1,6 +1,6 @@
 import tkinter as tk
-from tkinter import messagebox
 from tkinter import simpledialog
+
 
 class InfoMessageFrame:
     def __init__(self, masterframe, message):
@@ -29,7 +29,9 @@ class CustomInfoDialog(simpledialog.Dialog):
     def buttonbox(self):
         box = tk.Frame(self)
 
-        self.cancel_button = tk.Button(box, text=self.cancel_text, width=10, command=self.cancel)
+        self.cancel_button = tk.Button(
+            box, text=self.cancel_text, width=10, command=self.cancel
+        )
         self.cancel_button.pack(side=tk.RIGHT, padx=5, pady=5)
 
         self.bind("<Escape>", self.cancel)

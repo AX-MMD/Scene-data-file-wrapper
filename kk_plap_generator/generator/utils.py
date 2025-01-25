@@ -2,14 +2,12 @@ import os
 import typing
 import xml.etree.ElementTree as et
 
-import toml
-
-from kk_plap_generator import settings
 from kk_plap_generator.generator.plap_generator import PlapGenerator
 
 
-def generate_plaps(ref_single_file_path: str, groups: typing.List[typing.Dict[str, typing.Any]]):
-
+def generate_plaps(
+    ref_single_file_path: str, groups: typing.List[typing.Dict[str, typing.Any]]
+):
     xml_tree = et.ElementTree()
     xml_tree.parse(ref_single_file_path)
     plaps: typing.Dict[str, et.Element] = {}
@@ -17,7 +15,9 @@ def generate_plaps(ref_single_file_path: str, groups: typing.List[typing.Dict[st
 
     for group in groups:
         plap_generator = PlapGenerator(**group)
-        output.append(f"Generating plap for {plap_generator.plap_names} with pattern '{plap_generator.pattern_string}'")
+        output.append(
+            f"Generating plap for {plap_generator.plap_names} with pattern '{plap_generator.pattern_string}'"
+        )
         print(output[-1])
         sfx_node, frame_count, first_last_frames = plap_generator.generate_plap_xml(
             xml_tree
@@ -45,7 +45,7 @@ def generate_plaps(ref_single_file_path: str, groups: typing.List[typing.Dict[st
             os.path.dirname(ref_single_file_path), f"{plap_folder.get('alias')}.xml"
         )
         tree.write(filename)
-        output.append(f"Generated '{filename}'")
+        output.append(f"> Generated '{filename}'")
         print(output[-1])
 
     return output

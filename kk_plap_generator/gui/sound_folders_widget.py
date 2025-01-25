@@ -26,9 +26,7 @@ class SoundFoldersWidget:
         # Sound Folders
         self.top_left_frame = tk.Frame(self.top_frame)
         self.top_left_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
-        self.sound_folders_label = tk.Label(
-            self.top_left_frame, text="Sound Folders"
-        )
+        self.sound_folders_label = tk.Label(self.top_left_frame, text="Sound Folders")
         self.sound_folders_label.pack()
 
         self.top_right_frame = InfoMessageFrame(self.top_frame, "Sound Folders info")
