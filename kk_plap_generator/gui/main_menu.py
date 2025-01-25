@@ -6,6 +6,7 @@ import tkinterdnd2
 import toml
 
 from kk_plap_generator import settings
+from kk_plap_generator.generator.plap_generator import NodeNotFoundError
 from kk_plap_generator.generator.utils import generate_plaps
 from kk_plap_generator.gui.dnd_widget import DnDWidget
 from kk_plap_generator.gui.output_mesage_box import CustomMessageBox
@@ -149,13 +150,25 @@ class PlapUI(tk.Frame):
             messagebox.showerror("Error", "Please select a file.xml")
         else:
             try:
-                print(self.plap_config)
+                self.save_config()
                 output = generate_plaps(
                     self.dnd_widget.get_single_file(), self.plap_config["plap_group"]
                 )
-                CustomMessageBox(self, "Output", "\n".join(output))
+                CustomMessageBox(self, "Success ✔", "\n".join(output))
+            except NodeNotFoundError as e:
+                message = f"::: Node not found :::\n"
+                message += f"\n> Missing node: {e.node_name}"
+                if e.tag == "name":
+                    message += f"\n> Could not find the parent group {e.value} in the xml file."
+                    message += f"\n> Make sure the path \"{self.store['interpolable_path']}\" is correct."
+                else:
+                    message += f"\n> Could not find the interpolable {e.value} in the xml file."
+                    message += f"\n> Make sure you renamed the interpolable to \"{self.store['interpolable_path'].split('.')[-1]}\","
+                    message += f"\n  in CharacterStudio even if that was already the name."
+                    message += "\n  This is needed so an alias is created."
+                CustomMessageBox(self, "Failled ✖", message)
             except Exception:
-                messagebox.showerror("Error", traceback.format_exc())
+                CustomMessageBox(self, "Failled ✖", traceback.format_exc())
 
     @classmethod
     def default_config(cls) -> tkinterdnd2.Tk:

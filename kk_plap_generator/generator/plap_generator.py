@@ -348,7 +348,16 @@ class KeyframeReference(Keyframe):
 
 
 class NodeNotFoundError(Exception):
-    pass
+    def __init__(self, tag, value, *args):
+        self.tag = tag
+        self.value = value
+        if self.tag == "name":
+            self.node_name = f"interpolableGroup[@{tag}='{value}']"
+            self.message = f"Node not found: {self.node_name}"
+        else:
+            self.node_name = f"interpolable[@{tag}='{value}']"
+            self.message = f"Node not found: {self.node_name}"
+        super().__init__(self.message, *args)
 
 
 def find_interpolable(tree: et.ElementTree, target: str):
@@ -364,7 +373,7 @@ def find_interpolable(tree: et.ElementTree, target: str):
 
     node = node.find(f"""interpolable[@{tag}='{value}']""")
     if node is None:
-        raise NodeNotFoundError(f"Node not found: interpolable[@{tag}='{value}']")
+        raise NodeNotFoundError(tag, value)
 
     return node
 

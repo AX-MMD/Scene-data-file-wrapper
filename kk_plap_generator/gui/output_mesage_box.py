@@ -5,7 +5,7 @@ class CustomMessageBox(tk.Toplevel):
     def __init__(self, parent, title, message):
         super().__init__(parent)
         self.title(title)
-        self.geometry("600x400")  # Set the initial size of the message box
+        self.geometry("640x300")  # Set the initial size of the message box
 
         self.message_frame = tk.Frame(self)
         self.message_frame.pack(fill=tk.BOTH, expand=True)
