@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import simpledialog
 import typing
 from tkinter import messagebox
 
@@ -56,35 +57,54 @@ class TimeRangesWidget:
             self.update()
 
     def add_time_range(self):
-        dialog = tk.Toplevel(self.app.master)
-        dialog.title("Add Time Range")
-
-        tk.Label(dialog, text="Start Time").grid(row=0, column=0)
-        start_time_entry = tk.Entry(dialog, justify="center")
-        start_time_entry.grid(row=0, column=1)
-        start_time_entry.insert(0, "00:00.00")
-        tk.Label(dialog, text="MM:SS.SS").grid(row=0, column=2)
-
-        tk.Label(dialog, text="Stop Time").grid(row=1, column=0)
-        stop_time_entry = tk.Entry(dialog, justify="center")
-        stop_time_entry.grid(row=1, column=1)
-        stop_time_entry.insert(0, "00:00.00")
-        tk.Label(dialog, text="MM:SS.SS").grid(row=1, column=2)
-
-        def on_ok():
-            start_time = start_time_entry.get()
-            stop_time = stop_time_entry.get()
-            if not validate_time(start_time) and validate_time(stop_time):
-                messagebox.showerror(
-                    "Validation Error", "Invalid time format. Expected MM:SS.SS"
-                )
-            elif start_time > stop_time:
-                messagebox.showerror(
-                    "Validation Error", "Start time must be before Stop time"
-                )
-            else:
+        dialog = CustomDialog(self.masterframe, title="Add Time Range")
+        result = dialog.result
+        if result:
+            start_time = result["start_time"]
+            stop_time = result["stop_time"]
+            if validate_time(start_time) and validate_time(stop_time):
                 self.store["time_ranges"].append([start_time, stop_time])
-                self.update()
-                dialog.destroy()
+                self.update_time_ranges()
+            else:
+                tk.messagebox.showerror("Validation Error", "Invalid time format. Expected MM:SS.SS")
 
-        tk.Button(dialog, text="Ok", command=on_ok).grid(row=2, column=0, columnspan=3)
+
+class CustomDialog(simpledialog.Dialog):
+    def __init__(self, parent, title=None):
+        self.ok_text = "✔"
+        self.cancel_text = "✖"
+        super().__init__(parent, title)
+
+    def body(self, master):
+        tk.Label(master, text="Start Time").grid(row=0, column=0)
+        self.start_time_entry = tk.Entry(master, justify="center")
+        self.start_time_entry.grid(row=0, column=1)
+        self.start_time_entry.insert(0, "00:00.00")
+        tk.Label(master, text="MM:SS.SS").grid(row=0, column=2)
+
+        tk.Label(master, text="Stop Time").grid(row=1, column=0)
+        self.stop_time_entry = tk.Entry(master, justify="center")
+        self.stop_time_entry.grid(row=1, column=1)
+        self.stop_time_entry.insert(0, "00:00.00")
+        tk.Label(master, text="MM:SS.SS").grid(row=1, column=2)
+
+        return self.start_time_entry  # initial focus
+
+    def buttonbox(self):
+        box = tk.Frame(self)
+
+        self.ok_button = tk.Button(box, text=self.ok_text, width=10, fg="green", command=self.ok, default=tk.ACTIVE)
+        self.ok_button.pack(side=tk.LEFT, padx=5, pady=5)
+        self.cancel_button = tk.Button(box, text=self.cancel_text, width=10, fg="red", command=self.cancel)
+        self.cancel_button.pack(side=tk.LEFT, padx=5, pady=5)
+
+        self.bind("<Return>", self.ok)
+        self.bind("<Escape>", self.cancel)
+
+        box.pack()
+
+    def apply(self):
+        self.result = {
+            "start_time": self.start_time_entry.get(),
+            "stop_time": self.stop_time_entry.get()
+        }

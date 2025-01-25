@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import font
 
 import tkinterdnd2
 import toml
@@ -21,6 +22,8 @@ class PlapUI(tk.Frame):
         self.config_path: str = config_path
         self.plap_config = self.load_config()
         self.store = self.plap_config.get("plap_group")[0]
+        self.symbol_font = font.Font(family="Arial", size=13)
+        
         self.pack(fill=tk.BOTH, expand=True)
         self.create_widgets()
 
@@ -105,7 +108,7 @@ class PlapUI(tk.Frame):
         self.sound_pattern_widget = SoundPatternWidget(self, self.middle_frame)
 
         # Save Button
-        self.save_button = tk.Button(self, text="Save", command=self.save_button_action)
+        self.save_button = tk.Button(self, text="💾", command=self.save_button_action)
         self.save_button.grid(row=2, column=1, sticky="nsew")
 
         # Sound Offset and Min Pull Out/In

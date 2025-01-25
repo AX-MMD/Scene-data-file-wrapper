@@ -50,9 +50,8 @@ class SoundFoldersWidget:
             self.sound_folders_listbox.insert(tk.END, name)
 
     def add_sound_folder_name(self):
-        name = simpledialog.askstring(
-            "Input", "Enter folder name:", parent=self.app.master
-        )
+        dialog = CustomDialog(self.masterframe, title="Add Sound Folder")
+        name = dialog.result
         if name:
             self.store["plap_folder_names"].append(name)
             self.update()
@@ -63,3 +62,32 @@ class SoundFoldersWidget:
             selected_name = self.sound_folders_listbox.get(selected_index)
             self.store["plap_folder_names"].remove(selected_name)
             self.update()
+
+
+class CustomDialog(simpledialog.Dialog):
+    def __init__(self, parent, title=None):
+        self.ok_text = "✔"
+        self.cancel_text = "✖"
+        super().__init__(parent, title)
+
+    def body(self, master):
+        tk.Label(master, text="Enter folder name:").grid(row=0)
+        self.entry = tk.Entry(master)
+        self.entry.grid(row=0, column=1)
+        return self.entry  # initial focus
+
+    def buttonbox(self):
+        box = tk.Frame(self)
+
+        self.ok_button = tk.Button(box, text=self.ok_text, width=10, fg="green", command=self.ok, default=tk.ACTIVE)
+        self.ok_button.pack(side=tk.LEFT, padx=5, pady=5)
+        self.cancel_button = tk.Button(box, text=self.cancel_text, width=10, fg="red", command=self.cancel)
+        self.cancel_button.pack(side=tk.LEFT, padx=5, pady=5)
+
+        self.bind("<Return>", self.ok)
+        self.bind("<Escape>", self.cancel)
+
+        box.pack()
+
+    def apply(self):
+        self.result = self.entry.get()

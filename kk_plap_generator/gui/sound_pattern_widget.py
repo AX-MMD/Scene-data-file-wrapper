@@ -40,7 +40,7 @@ class SoundPatternWidget:
             button.pack(side=tk.LEFT)
 
         self.clear_pattern_string_button = tk.Button(
-            self.pattern_string_frame, text="Clear", command=self.clear_pattern_string
+            self.pattern_string_frame, text="Clear ✖", fg="red", command=self.clear_pattern_string
         )
         self.clear_pattern_string_button.pack()
 
