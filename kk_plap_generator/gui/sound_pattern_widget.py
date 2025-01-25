@@ -2,6 +2,7 @@ import tkinter as tk
 import typing
 
 from kk_plap_generator.generator.plap_generator import PlapGenerator
+from kk_plap_generator.gui.info_message import InfoMessageFrame
 
 if typing.TYPE_CHECKING:
     from kk_plap_generator.gui.main_menu import PlapUI
@@ -15,10 +16,23 @@ class SoundPatternWidget:
 
         self.pattern_string_frame = tk.Frame(masterframe, bd=2, relief="solid")
         self.pattern_string_frame.grid(row=1, column=0, sticky="nsew")
+
+        # Top
+        self.top_frame = tk.Frame(self.pattern_string_frame)
+        self.top_frame.grid_columnconfigure(0, weight=90)
+        self.top_frame.grid_columnconfigure(1, weight=10)
+        self.top_frame.pack(fill=tk.X)
+
+        self.top_left_frame = tk.Frame(self.top_frame)
+        self.top_left_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
         self.pattern_string_label = tk.Label(
-            self.pattern_string_frame, text="Sound Pattern"
+            self.top_left_frame, text="Sound Pattern"
         )
         self.pattern_string_label.pack()
+
+        self.top_right_frame = InfoMessageFrame(self.top_frame, "Sound Pattern info")
+
+        # Pattern value display
         self.pattern_string_value = tk.Label(
             self.pattern_string_frame,
             text=self.store["pattern_string"],
@@ -40,7 +54,10 @@ class SoundPatternWidget:
             button.pack(side=tk.LEFT)
 
         self.clear_pattern_string_button = tk.Button(
-            self.pattern_string_frame, text="Clear ✖", fg="red", command=self.clear_pattern_string
+            self.pattern_string_frame,
+            text="Clear ✖",
+            fg="red",
+            command=self.clear_pattern_string,
         )
         self.clear_pattern_string_button.pack()
 

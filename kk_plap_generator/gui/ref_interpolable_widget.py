@@ -1,6 +1,8 @@
 import tkinter as tk
 import typing
+from tkinter import messagebox
 
+from kk_plap_generator.gui.info_message import InfoMessageFrame
 from kk_plap_generator.gui.validators import validate_time
 
 if typing.TYPE_CHECKING:
@@ -15,11 +17,24 @@ class RefInterpolableWidget:
 
         self.ref_keyframe_time_frame = tk.Frame(masterframe, bd=2, relief="solid")
         self.ref_keyframe_time_frame.grid(row=1, column=0, sticky="nsew")
+
+        # Top
+        self.top_frame = tk.Frame(self.ref_keyframe_time_frame)
+        self.top_frame.grid_columnconfigure(0, weight=90)
+        self.top_frame.grid_columnconfigure(1, weight=10)
+        self.top_frame.pack(fill=tk.X)
+
+        self.top_left_frame = tk.Frame(self.top_frame)
+        self.top_left_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
         self.ref_keyframe_time_label = tk.Label(
-            self.ref_keyframe_time_frame, text="Reference Interpolable"
+            self.top_left_frame,
+            text="Reference Interpolable",
         )
         self.ref_keyframe_time_label.pack()
 
+        self.top_right_frame = InfoMessageFrame(self.top_frame, "Reference Interpolable info")
+
+        # Reference keyframe Time
         self.time_frame = tk.Frame(self.ref_keyframe_time_frame)
         self.time_frame.pack(fill=tk.X, padx=5, pady=5)
         self.time_label = tk.Label(self.time_frame, text="Time")
@@ -29,7 +44,7 @@ class RefInterpolableWidget:
         self.ref_keyframe_time_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
         self.time_format_label = tk.Label(self.time_frame, text="MM:SS.SS")
         self.time_format_label.pack(side=tk.RIGHT)
-
+        # Interpolable Path
         self.path_frame = tk.Frame(self.ref_keyframe_time_frame)
         self.path_frame.pack(fill=tk.X, padx=5, pady=5)
         self.path_label = tk.Label(self.path_frame, text="Path")

@@ -1,6 +1,7 @@
 import tkinter as tk
 import typing
 
+from kk_plap_generator.gui.info_message import InfoMessageFrame
 from kk_plap_generator.gui.validators import validate_offset
 
 if typing.TYPE_CHECKING:
@@ -15,11 +16,24 @@ class SeqAdjustmentWidget:
 
         self.offset_frame = tk.Frame(masterframe, bd=2, relief="solid")
         self.offset_frame.grid(row=0, column=0, sticky="nsew")
-        self.offset_label = tk.Label(self.offset_frame, text="Sound Offset")
+
+        # Top
+        self.top_frame = tk.Frame(self.offset_frame)
+        self.top_frame.grid_columnconfigure(0, weight=90)
+        self.top_frame.grid_columnconfigure(1, weight=10)
+        self.top_frame.pack(fill=tk.X)
+
+        # Offset
+        self.top_left_frame = tk.Frame(self.top_frame)
+        self.top_left_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        self.offset_label = tk.Label(self.top_left_frame, text="Sound Offset")
         self.offset_label.pack()
         self.offset_entry = tk.Entry(self.offset_frame, justify="center")
         self.offset_entry.insert(0, self.store["offset"])
         self.offset_entry.pack()
+
+        self.top_right_frame = InfoMessageFrame(self.top_frame, "Seq adjustment info")
+
         # Min Pull Out
         self.min_pull_out_label = tk.Label(self.offset_frame, text="Minimum Pull Out %")
         self.min_pull_out_label.pack()

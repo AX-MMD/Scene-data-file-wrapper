@@ -1,6 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox
-from tkinter import font
+from tkinter import font, messagebox
 
 import tkinterdnd2
 import toml
@@ -16,51 +15,25 @@ from kk_plap_generator.gui.time_ranges_widget import TimeRangesWidget
 
 
 class PlapUI(tk.Frame):
-    def __init__(self, master=None, config_path=settings.CONFIG_FILE):
+    def __init__(self, master=None, config_path=settings.CONFIG_FILE, default_config_path=settings.DEFAULT_CONFIG_FILE):
         super().__init__(master)
         self.master = master
         self.config_path: str = config_path
+        self.default_config_path = default_config_path
         self.plap_config = self.load_config()
         self.store = self.plap_config.get("plap_group")[0]
         self.symbol_font = font.Font(family="Arial", size=13)
-        
+
         self.pack(fill=tk.BOTH, expand=True)
         self.create_widgets()
 
-    def load_config(self):
+    def load_config(self, use_default=False):
+        if use_default:
+            with open(self.default_config_path, "r") as f:
+                return toml.load(f)
         with open(self.config_path, "r") as f:
             return toml.load(f)
-
-    def save_button_action(self):
-        self.save_config()
-        self.load_config()
-        self.update_widgets()
-
-    def save_config(self):
-        errors = []
-
-        errors.extend(self.ref_interpolable_widget.save())
-        errors.extend(self.seq_adjustment_widget.save())
-        errors.extend(self.sound_pattern_widget.save())
-
-        if errors:
-            messagebox.showerror("Error", "\n".join(errors))
-            return
-
-        self.plap_config["plap_group"] = [self.store]
-
-        with open(self.config_path, "w") as f:
-            toml.dump(self.plap_config, f)
-
-    def generate_plaps(self):
-        if not self.store.get("ref_single_file_path"):
-            messagebox.showerror("Error", "Please select a reference file")
-        else:
-            try:
-                generate_plaps(self.store["ref_single_file_path"])
-            except Exception as e:
-                messagebox.showerror("Error", str(e))
-
+        
     def update_widgets(self):
         self.ref_interpolable_widget.update()
         self.seq_adjustment_widget.update()
@@ -68,11 +41,12 @@ class PlapUI(tk.Frame):
         self.time_ranges_widget.update()
 
     def create_widgets(self):
-        # Create the main 1x3 grid
+        # Create the main 2x3 grid
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
         self.grid_columnconfigure(2, weight=1)
-        self.grid_rowconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=90)
+        self.grid_rowconfigure(1, weight=10)
 
         # Left frame with 2x1 grid
         self.left_frame = tk.Frame(self)
@@ -107,15 +81,65 @@ class PlapUI(tk.Frame):
         # Sound Pattern
         self.sound_pattern_widget = SoundPatternWidget(self, self.middle_frame)
 
-        # Save Button
-        self.save_button = tk.Button(self, text="💾", command=self.save_button_action)
-        self.save_button.grid(row=2, column=1, sticky="nsew")
-
         # Sound Offset and Min Pull Out/In
         self.seq_adjustment_widget = SeqAdjustmentWidget(self, self.right_frame)
 
         # Time Ranges
         self.time_ranges_widget = TimeRangesWidget(self, self.right_frame)
+
+        self.bottom_left_frame = tk.Frame(self)
+        self.bottom_left_frame.grid(row=1, column=0, sticky="nsew")
+        self.bottom_left_frame.grid_columnconfigure(0, weight=1)
+        self.bottom_left_frame.grid_columnconfigure(1, weight=1)
+        self.bottom_left_frame.grid_columnconfigure(2, weight=1)
+
+        # Save Button
+        self.save_button = tk.Button(self.bottom_left_frame, text="Save 💾", command=self.save_button_action)
+        self.save_button.grid(row=0, column=0, sticky="nsew")
+
+        # Generate Button
+        self.generate_button = tk.Button(self.bottom_left_frame, text="▶", command=self.generate_plaps)
+        self.generate_button.grid(row=0, column=1, sticky="nsew")
+
+        # Reset Button
+        self.reset_button = tk.Button(self.bottom_left_frame, text="Reset ↺", command=self.reset_button_action)
+        self.reset_button.grid(row=0, column=2, sticky="nsew")
+        
+    def reset_button_action(self):
+        self.plap_config = self.load_config(use_default=True)
+        self.store = self.plap_config.get("plap_group")[0]
+        self.update_widgets()
+
+    def save_button_action(self):
+        self.save_config()
+        self.load_config()
+        self.update_widgets()
+
+    def save_config(self):
+        errors = []
+
+        errors.extend(self.ref_interpolable_widget.save())
+        errors.extend(self.seq_adjustment_widget.save())
+        errors.extend(self.sound_pattern_widget.save())
+
+        if errors:
+            messagebox.showerror("Error", "\n".join(errors))
+            return
+
+        self.plap_config["plap_group"] = [self.store]
+
+        with open(self.config_path, "w") as f:
+            toml.dump(self.plap_config, f)
+
+    def generate_plaps(self):
+        if not self.store.get("ref_single_file_path"):
+            messagebox.showerror("Error", "Please select a reference file")
+        else:
+            try:
+                generate_plaps(self.store["ref_single_file_path"])
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
+        
 
     @classmethod
     def default_config(cls) -> tkinterdnd2.Tk:

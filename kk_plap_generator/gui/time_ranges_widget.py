@@ -1,8 +1,8 @@
 import tkinter as tk
-from tkinter import simpledialog
 import typing
-from tkinter import messagebox
+from tkinter import simpledialog
 
+from kk_plap_generator.gui.info_message import InfoMessageFrame
 from kk_plap_generator.gui.validators import validate_time
 
 if typing.TYPE_CHECKING:
@@ -17,8 +17,20 @@ class TimeRangesWidget:
 
         self.time_ranges_frame = tk.Frame(masterframe, bd=2, relief="solid")
         self.time_ranges_frame.grid(row=1, column=0, sticky="nsew")
-        self.time_ranges_label = tk.Label(self.time_ranges_frame, text="Time Ranges")
+
+        # Top
+        self.top_frame = tk.Frame(self.time_ranges_frame)
+        self.top_frame.grid_columnconfigure(0, weight=90)
+        self.top_frame.grid_columnconfigure(1, weight=10)
+        self.top_frame.pack(fill=tk.X)
+
+        # Time Ranges
+        self.top_left_frame = tk.Frame(self.top_frame)
+        self.top_left_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        self.time_ranges_label = tk.Label(self.top_left_frame, text="Time Ranges")
         self.time_ranges_label.pack()
+
+        self.top_right_frame = InfoMessageFrame(self.top_frame, "Time Ranges info")
 
         self.time_ranges_listbox = tk.Listbox(self.time_ranges_frame)
         self.time_ranges_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -64,9 +76,11 @@ class TimeRangesWidget:
             stop_time = result["stop_time"]
             if validate_time(start_time) and validate_time(stop_time):
                 self.store["time_ranges"].append([start_time, stop_time])
-                self.update_time_ranges()
+                self.update()
             else:
-                tk.messagebox.showerror("Validation Error", "Invalid time format. Expected MM:SS.SS")
+                tk.messagebox.showerror(
+                    "Validation Error", "Invalid time format. Expected MM:SS.SS"
+                )
 
 
 class CustomDialog(simpledialog.Dialog):
@@ -93,9 +107,18 @@ class CustomDialog(simpledialog.Dialog):
     def buttonbox(self):
         box = tk.Frame(self)
 
-        self.ok_button = tk.Button(box, text=self.ok_text, width=10, fg="green", command=self.ok, default=tk.ACTIVE)
+        self.ok_button = tk.Button(
+            box,
+            text=self.ok_text,
+            width=10,
+            fg="green",
+            command=self.ok,
+            default=tk.ACTIVE,
+        )
         self.ok_button.pack(side=tk.LEFT, padx=5, pady=5)
-        self.cancel_button = tk.Button(box, text=self.cancel_text, width=10, fg="red", command=self.cancel)
+        self.cancel_button = tk.Button(
+            box, text=self.cancel_text, width=10, fg="red", command=self.cancel
+        )
         self.cancel_button.pack(side=tk.LEFT, padx=5, pady=5)
 
         self.bind("<Return>", self.ok)
@@ -106,5 +129,5 @@ class CustomDialog(simpledialog.Dialog):
     def apply(self):
         self.result = {
             "start_time": self.start_time_entry.get(),
-            "stop_time": self.stop_time_entry.get()
+            "stop_time": self.stop_time_entry.get(),
         }

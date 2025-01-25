@@ -2,6 +2,8 @@ import tkinter as tk
 import typing
 from tkinter import simpledialog
 
+from kk_plap_generator.gui.info_message import InfoMessageFrame
+
 if typing.TYPE_CHECKING:
     from kk_plap_generator.gui.main_menu import PlapUI
 
@@ -14,10 +16,22 @@ class SoundFoldersWidget:
 
         self.sound_folders_frame = tk.Frame(masterframe, bd=2, relief="solid")
         self.sound_folders_frame.grid(row=0, column=0, sticky="nsew")
+
+        # Top
+        self.top_frame = tk.Frame(self.sound_folders_frame)
+        self.top_frame.grid_columnconfigure(0, weight=90)
+        self.top_frame.grid_columnconfigure(1, weight=10)
+        self.top_frame.pack(fill=tk.X)
+
+        # Sound Folders
+        self.top_left_frame = tk.Frame(self.top_frame)
+        self.top_left_frame.pack(side=tk.LEFT, fill=tk.X, expand=True)
         self.sound_folders_label = tk.Label(
-            self.sound_folders_frame, text="Sound Folders"
+            self.top_left_frame, text="Sound Folders"
         )
         self.sound_folders_label.pack()
+
+        self.top_right_frame = InfoMessageFrame(self.top_frame, "Sound Folders info")
 
         self.sound_folders_listbox = tk.Listbox(self.sound_folders_frame)
         self.sound_folders_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -79,9 +93,18 @@ class CustomDialog(simpledialog.Dialog):
     def buttonbox(self):
         box = tk.Frame(self)
 
-        self.ok_button = tk.Button(box, text=self.ok_text, width=10, fg="green", command=self.ok, default=tk.ACTIVE)
+        self.ok_button = tk.Button(
+            box,
+            text=self.ok_text,
+            width=10,
+            fg="green",
+            command=self.ok,
+            default=tk.ACTIVE,
+        )
         self.ok_button.pack(side=tk.LEFT, padx=5, pady=5)
-        self.cancel_button = tk.Button(box, text=self.cancel_text, width=10, fg="red", command=self.cancel)
+        self.cancel_button = tk.Button(
+            box, text=self.cancel_text, width=10, fg="red", command=self.cancel
+        )
         self.cancel_button.pack(side=tk.LEFT, padx=5, pady=5)
 
         self.bind("<Return>", self.ok)
