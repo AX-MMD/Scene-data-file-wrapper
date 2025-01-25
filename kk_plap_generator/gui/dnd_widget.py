@@ -30,6 +30,9 @@ class DnDWidget:
         )
         self.select_file_button.pack()
 
+    def get_single_file(self):
+        return self.single_file
+
     def on_drop(self, event):
         self.single_file = event.data[1:-1]
         self.drag_drop_label.config(
