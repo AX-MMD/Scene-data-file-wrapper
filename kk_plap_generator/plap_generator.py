@@ -27,24 +27,24 @@ def keyframe_get(keyframe: et.Element, key: str) -> float:
     return float(cast(str, keyframe.get(key)))
 
 
-class KeyframeReference:
-    def __init__(self, keyframe: et.Element):
-        self.ref_node = keyframe
-        self.time = keyframe_get(keyframe, "time")
-        self.valueX = keyframe_get(keyframe, "valueX")
-        self.valueY = keyframe_get(keyframe, "valueY")
-        self.valueZ = keyframe_get(keyframe, "valueZ")
-
-    @property
-    def value(self):
-        return getattr(self, self.axis) if self.axis else None
+@dataclass
+class Keyframe:
+    node: et.Element
+    time: float
+    valueX: float
+    valueY: float
+    valueZ: float
 
 
 @dataclass
-class DirectionData:
+class KeyframeReference(Keyframe):
     axis: str
     out_direction: float
     estimated_pull_out: float
+
+    @property
+    def value(self):
+        return getattr(self, self.axis)
 
 
 def convert_string_to_nested_list(s):
@@ -122,7 +122,7 @@ class PlapGenerator:
         Generates the plap XML nodes based on the given timeline XML tree.
     """
 
-    valid_patern_chars = ["W", "M", "V", "A", "/", "\\"]
+    VALID_PATTERN_CHARS = ["V", "A", "W", "M", "\\", "/"]
 
     def __init__(
         self,
@@ -136,7 +136,7 @@ class PlapGenerator:
         plap_folder_names: List[str] = ["Plap1", "Plap2", "Plap3", "Plap4"],
         template_path: str = "template.xml",
     ):
-        # config file params ###
+        # config file params START ###
         self.interpolable_path = interpolable_path
         self.ref_keyframe_time = ref_keyframe_time
         self.delay = float(delay)  # Just in case we receive a string
@@ -144,10 +144,17 @@ class PlapGenerator:
         self.min_pull_in = float(min_pull_in)
         self.time_ranges = time_ranges
         self.pattern_string = pattern_string.capitalize()
+        for pattern_char in self.pattern_string:
+            if pattern_char not in self.VALID_PATTERN_CHARS:
+                raise ValueError(
+                    f"Invalid pattern {self.pattern_string}, valid characters are {', '.join(self.VALID_PATTERN_CHARS)} or a combination of them."
+                )
+
         self.plap_names = plap_folder_names
         self.plap_count = len(plap_folder_names)
         self.template_path = template_path
         # config file params END ###
+
         # fmt: off
         self.patterns: Dict[str, List[int]] = {
             "W": [i for i in range(self.plap_count)] \
@@ -164,11 +171,6 @@ class PlapGenerator:
             "\\": [i for i in range(self.plap_count)],
         }
         # fmt: on
-        for pattern_char in self.pattern_string:
-            if pattern_char not in self.valid_patern_chars:
-                raise ValueError(
-                    f"Invalid pattern {self.pattern_string}, valid characters are {', '.join(self.valid_patern_chars)} or a combination of them."
-                )
 
         self.sequence = self.generate_sequence(pattern_string)
 
@@ -225,16 +227,16 @@ class PlapGenerator:
         # Create the patern
         sequence = self.generate_sequence(self.pattern_string)
 
-        # Get the rythm from source single_file, will use parameters from config.json to locate the node
+        # Get the rythm from source single_file, will use parameters from the config to locate the node
         node = find_interpolable(timeline_xml_tree, self.interpolable_path)
         node_list = list(node)
 
         # We find the reference keyframe and directionnal information
-        reference, direction = self.get_reference(node_list)
+        reference = self.get_reference(node_list)
 
         keyframe_times = []
         did_plap = False
-        minimum_pull_out = self.min_pull_out * direction.estimated_pull_out
+        minimum_pull_out = self.min_pull_out * reference.estimated_pull_out
         for time_start, time_end in self.get_time_ranges_sec():
             keyframes = node_list
             max_index = len(keyframes) - 1
@@ -258,7 +260,7 @@ class PlapGenerator:
                     break
                 elif (
                     did_plap is True
-                    and abs(keyframe_get(keyframe, direction.axis) - reference.value)
+                    and abs(keyframe_get(keyframe, reference.axis) - reference.value)
                     > minimum_pull_out
                 ):
                     # Only re-enable plapping after a minimum distance is reached
@@ -267,11 +269,11 @@ class PlapGenerator:
                     # Check if the keyframe is close enough to the reference keyframe value
                     # TODO: probably more work to be done here
                     if (
-                        direction.out_direction == -1
-                        and keyframe_get(keyframe, direction.axis)
+                        reference.out_direction == -1
+                        and keyframe_get(keyframe, reference.axis)
                         <= (reference.value + self.min_pull_in * reference.value)
-                        or direction.out_direction == 1
-                        and keyframe_get(keyframe, direction.axis)
+                        or reference.out_direction == 1
+                        and keyframe_get(keyframe, reference.axis)
                         >= (reference.value - self.min_pull_in * reference.value)
                     ):
                         keyframe_times.append(time)
@@ -315,9 +317,7 @@ class PlapGenerator:
     def is_reference_time(self, time: float):
         return time + 0.00001 >= self._ref_kf_seconds >= time - 0.00001
 
-    def get_reference(
-        self, node_list: List[et.Element]
-    ) -> Tuple[KeyframeReference, DirectionData]:
+    def get_reference(self, node_list: List[et.Element]) -> KeyframeReference:
         # We itterate instead of an exact search because the "time" attribute can have a higher precision than what the user can provide.
         reference = None
         ref_index = 0
@@ -325,7 +325,13 @@ class PlapGenerator:
             time = self._std_time(keyframe.get("time", 0.0))
             if self.is_reference_time(time):
                 ref_index = i
-                reference = KeyframeReference(keyframe)
+                reference = Keyframe(
+                    node=keyframe,
+                    time=time,
+                    valueX=keyframe_get(keyframe, "valueX"),
+                    valueY=keyframe_get(keyframe, "valueY"),
+                    valueZ=keyframe_get(keyframe, "valueZ"),
+                )
                 break
 
         if reference is None:
@@ -355,11 +361,20 @@ class PlapGenerator:
 
             # We then try and estimate the pull out distance by taking the biggest difference between the reference keyframe and (up too) the next 5 keyframes.
             estimated_pull_out = max(
-                abs(keyframe_get(node_list[j], axis) - reference.value)
+                abs(keyframe_get(node_list[j], axis) - getattr(reference, axis))
                 for j in range(ref_index, min(ref_index + 6, len(node_list)))
             )
 
-        return reference, DirectionData(axis, out_direction, estimated_pull_out)
+        return KeyframeReference(
+            node=reference.node,
+            time=reference.time,
+            valueX=reference.valueX,
+            valueY=reference.valueY,
+            valueZ=reference.valueZ,
+            axis=axis,
+            out_direction=out_direction,
+            estimated_pull_out=estimated_pull_out,
+        )
 
     def _get_pattern_for_char(self, pattern_char: str) -> List[int]:
         return self.patterns[pattern_char]

@@ -5,6 +5,7 @@ import typing
 from xml.etree import ElementTree as et
 
 import toml
+from kk_plap_generator import settings
 from plap_generator import PlapGenerator
 
 if __name__ == "__main__":
@@ -13,18 +14,15 @@ if __name__ == "__main__":
         sys.exit(1)
 
     ref_single_file_path = sys.argv[1]
-    workdir = os.path.dirname(os.path.abspath(__file__))
-    config_name = "config.toml"
-    config_path = os.path.join(workdir, config_name)
 
     if not os.path.isfile(ref_single_file_path):
         print(f"The path '{ref_single_file_path}' is not valid.")
         sys.exit(1)
-    if not os.path.isfile(config_path):
-        print(f"Missing '{config_name}' in '{workdir}'")
+    if not os.path.isfile(settings.CONFIG_FILE):
+        print(f"Missing '{settings.CONFIG_FILE}' in '{settings.CONFIG_FOLDER}'")
         sys.exit(1)
     try:
-        with open(config_path, "r") as file:
+        with open(settings.CONFIG_FILE, "r") as file:
             groups = toml.load(file).get("plap_group")
 
         if not isinstance(groups, list):

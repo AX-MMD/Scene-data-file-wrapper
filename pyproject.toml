@@ -1,5 +1,5 @@
 [project]
-name = "kk-plap-generator"
+name = "kk_plap_generator"
 version = "0.1.0"
 description = ""
 authors = [
@@ -7,25 +7,22 @@ authors = [
 ]
 readme = "README.md"
 requires-python = ">=3.12,<4.0"
+package-mode = false
 dependencies = [
     "toml (>=0.10.2,<0.11.0)",
-    "black (>=24.10.0,<25.0.0)",
-    "isort (>=5.13.2,<6.0.0)",
-    "flakeheaven (>=3.3.0,<4.0.0)",
-    "mypy (>=1.14.1,<2.0.0)",
-    "types-toml (>=0.10.8.20240310,<0.11.0.0)",
-    "ruff (>=0.9.3,<0.10.0)"
 ]
 
+[tool.poetry.group.lint.dependencies]
+mypy = "^1.14.1"
+ruff = "^0.9.3"
+types-toml = "^0.10.8.20240310"
+
+[tool.poetry.group.gui.dependencies]
+tkinterdnd2 = "^0.4.2"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.isort]
-profile = "black"
-src_paths = "tiguidou"
-combine_as_imports = true
 
 [tool.ruff]
 line-length = 90
@@ -33,6 +30,3 @@ line-length = 90
 [tool.ruff.lint]
 select = ["I", "F", "E", "W"]
 ignore = ["E203", "F811", "E501", "E266"]
-
-[tool.black]
-line-length = 90

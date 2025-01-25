@@ -1,18 +1,16 @@
 .DEFAULT_GOAL := all
-isort = isort kk-plap-generator
-black = black kk-plap-generator
-mypylint = mypy kk-plap-generator
+project_name = kk_plap_generator
+mypylint = mypy $(project_name) --ignore-missing-imports --no-warn-unused-ignores --warn-redundant-casts --warn-unused-ignores --pretty --show-error-codes --check-untyped-defs
 
 .PHONY: format
 format:
-	$(isort)
-	$(black)
+	ruff format $(project_name)
+	ruff check --fix
 	$(mypylint)
 
 .PHONY: lint
 lint:
-	$(isort) --check-only
-	$(black) --check
+	ruff check
 	$(mypylint)
 
 .PHONY: need_update
