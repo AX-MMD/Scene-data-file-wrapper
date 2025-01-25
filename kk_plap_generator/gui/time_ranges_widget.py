@@ -13,7 +13,6 @@ class TimeRangesWidget:
     def __init__(self, app: "PlapUI", masterframe):
         self.app = app
         self.masterframe = masterframe
-        self.store = app.store
 
         self.time_ranges_frame = tk.Frame(masterframe, bd=2, relief="solid")
         self.time_ranges_frame.grid(row=1, column=0, sticky="nsew")
@@ -57,7 +56,7 @@ class TimeRangesWidget:
 
     def update(self):
         self.time_ranges_listbox.delete(0, tk.END)
-        for start, stop in self.store.get("time_ranges", []):
+        for start, stop in self.app.store.get("time_ranges", []):
             self.time_ranges_listbox.insert(tk.END, f"{start} - {stop}")
 
     def remove_selected_time_range(self):
@@ -65,7 +64,7 @@ class TimeRangesWidget:
         if selected_index:
             selected_time_range = self.time_ranges_listbox.get(selected_index)
             start, stop = selected_time_range.split(" - ")
-            self.store["time_ranges"].remove([start, stop])
+            self.app.store["time_ranges"].remove([start, stop])
             self.update()
 
     def add_time_range(self):
@@ -75,7 +74,7 @@ class TimeRangesWidget:
             start_time = result["start_time"]
             stop_time = result["stop_time"]
             if validate_time(start_time) and validate_time(stop_time):
-                self.store["time_ranges"].append([start_time, stop_time])
+                self.app.store["time_ranges"].append([start_time, stop_time])
                 self.update()
             else:
                 tk.messagebox.showerror(

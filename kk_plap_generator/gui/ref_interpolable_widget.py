@@ -13,7 +13,6 @@ class RefInterpolableWidget:
     def __init__(self, app: "PlapUI", masterframe):
         self.app = app
         self.masterframe = masterframe
-        self.store = app.store
 
         self.ref_keyframe_time_frame = tk.Frame(masterframe, bd=2, relief="solid")
         self.ref_keyframe_time_frame.grid(row=1, column=0, sticky="nsew")
@@ -40,7 +39,7 @@ class RefInterpolableWidget:
         self.time_label = tk.Label(self.time_frame, text="Time")
         self.time_label.pack(side=tk.LEFT)
         self.ref_keyframe_time_entry = tk.Entry(self.time_frame, justify="center")
-        self.ref_keyframe_time_entry.insert(0, self.store["ref_keyframe_time"])
+        self.ref_keyframe_time_entry.insert(0, self.app.store["ref_keyframe_time"])
         self.ref_keyframe_time_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
         self.time_format_label = tk.Label(self.time_frame, text="MM:SS.SS")
         self.time_format_label.pack(side=tk.RIGHT)
@@ -50,14 +49,14 @@ class RefInterpolableWidget:
         self.path_label = tk.Label(self.path_frame, text="Path")
         self.path_label.pack(side=tk.LEFT)
         self.interpolable_path_entry = tk.Entry(self.path_frame)
-        self.interpolable_path_entry.insert(0, self.store["interpolable_path"])
+        self.interpolable_path_entry.insert(0, self.app.store["interpolable_path"])
         self.interpolable_path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
     def update(self):
         self.ref_keyframe_time_entry.delete(0, tk.END)
-        self.ref_keyframe_time_entry.insert(0, self.store["ref_keyframe_time"])
+        self.ref_keyframe_time_entry.insert(0, self.app.store["ref_keyframe_time"])
         self.interpolable_path_entry.delete(0, tk.END)
-        self.interpolable_path_entry.insert(0, self.store["interpolable_path"])
+        self.interpolable_path_entry.insert(0, self.app.store["interpolable_path"])
 
     def save(self):
         errors = []
@@ -67,10 +66,10 @@ class RefInterpolableWidget:
         if not validate_time(ref_keyframe_time):
             errors.append("Invalid ref_keyframe_time format. Expected MM:SS.SS")
             self.ref_keyframe_time_entry.delete(0, tk.END)
-            self.ref_keyframe_time_entry.insert(0, self.store["ref_keyframe_time"])
+            self.ref_keyframe_time_entry.insert(0, self.app.store["ref_keyframe_time"])
         else:
-            self.store["ref_keyframe_time"] = ref_keyframe_time
+            self.app.store["ref_keyframe_time"] = ref_keyframe_time
 
-        self.store["interpolable_path"] = self.interpolable_path_entry.get()
+        self.app.store["interpolable_path"] = self.interpolable_path_entry.get()
 
         return errors

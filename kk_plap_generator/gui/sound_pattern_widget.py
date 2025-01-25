@@ -12,7 +12,6 @@ class SoundPatternWidget:
     def __init__(self, app: "PlapUI", masterframe):
         self.app = app
         self.masterframe = masterframe
-        self.store = app.store
 
         self.pattern_string_frame = tk.Frame(masterframe, bd=2, relief="solid")
         self.pattern_string_frame.grid(row=1, column=0, sticky="nsew")
@@ -35,7 +34,7 @@ class SoundPatternWidget:
         # Pattern value display
         self.pattern_string_value = tk.Label(
             self.pattern_string_frame,
-            text=self.store["pattern_string"],
+            text=self.app.store["pattern_string"],
         )
         self.pattern_string_value.pack()
 
@@ -62,19 +61,19 @@ class SoundPatternWidget:
         self.clear_pattern_string_button.pack()
 
     def add_to_pattern_string(self, char):
-        self.store["pattern_string"] += char
-        self.pattern_string_value.config(text=self.store["pattern_string"])
+        self.app.store["pattern_string"] += char
+        self.pattern_string_value.config(text=self.app.store["pattern_string"])
 
     def clear_pattern_string(self):
-        self.store["pattern_string"] = ""
+        self.app.store["pattern_string"] = ""
         self.pattern_string_value.config(text="")
 
     def update(self):
-        self.pattern_string_value.config(text=self.store["pattern_string"])
+        self.pattern_string_value.config(text=self.app.store["pattern_string"])
 
     def save(self):
         errors: typing.List[str] = []
-        if not self.store.get("pattern_string"):
-            self.store["pattern_string"] = PlapGenerator.VALID_PATTERN_CHARS[0]
+        if not self.app.store.get("pattern_string"):
+            self.app.store["pattern_string"] = PlapGenerator.VALID_PATTERN_CHARS[0]
 
         return errors

@@ -12,7 +12,7 @@ class SoundFoldersWidget:
     def __init__(self, app: "PlapUI", masterframe):
         self.app = app
         self.masterframe = masterframe
-        self.store = app.store
+        self.app.store = app.store
 
         self.sound_folders_frame = tk.Frame(masterframe, bd=2, relief="solid")
         self.sound_folders_frame.grid(row=0, column=0, sticky="nsew")
@@ -60,21 +60,21 @@ class SoundFoldersWidget:
 
     def update(self):
         self.sound_folders_listbox.delete(0, tk.END)
-        for name in self.store["plap_folder_names"]:
+        for name in self.app.store["plap_folder_names"]:
             self.sound_folders_listbox.insert(tk.END, name)
 
     def add_sound_folder_name(self):
         dialog = CustomDialog(self.masterframe, title="Add Sound Folder")
         name = dialog.result
         if name:
-            self.store["plap_folder_names"].append(name)
+            self.app.store["plap_folder_names"].append(name)
             self.update()
 
     def remove_selected_sound_folder_name(self):
         selected_index = self.sound_folders_listbox.curselection()
         if selected_index:
             selected_name = self.sound_folders_listbox.get(selected_index)
-            self.store["plap_folder_names"].remove(selected_name)
+            self.app.store["plap_folder_names"].remove(selected_name)
             self.update()
 
 

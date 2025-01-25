@@ -12,7 +12,6 @@ class SeqAdjustmentWidget:
     def __init__(self, app: "PlapUI", masterframe):
         self.app = app
         self.masterframe = masterframe
-        self.store = app.store
 
         self.offset_frame = tk.Frame(masterframe, bd=2, relief="solid")
         self.offset_frame.grid(row=0, column=0, sticky="nsew")
@@ -29,7 +28,7 @@ class SeqAdjustmentWidget:
         self.offset_label = tk.Label(self.top_left_frame, text="Sound Offset")
         self.offset_label.pack()
         self.offset_entry = tk.Entry(self.offset_frame, justify="center")
-        self.offset_entry.insert(0, self.store["offset"])
+        self.offset_entry.insert(0, self.app.store["offset"])
         self.offset_entry.pack()
 
         self.top_right_frame = InfoMessageFrame(self.top_frame, "Seq adjustment info")
@@ -43,7 +42,7 @@ class SeqAdjustmentWidget:
         self.min_pull_out_slider = tk.Scale(
             self.min_pull_out_frame, from_=0, to=100, orient=tk.HORIZONTAL, resolution=0.5
         )
-        self.min_pull_out_slider.set(self.store["min_pull_out"] * 100)
+        self.min_pull_out_slider.set(self.app.store["min_pull_out"] * 100)
 
         # Left button
         self.min_pull_out_left_button = tk.Button(
@@ -74,7 +73,7 @@ class SeqAdjustmentWidget:
         self.min_pull_in_slider = tk.Scale(
             self.min_pull_in_frame, from_=0, to=100, orient=tk.HORIZONTAL, resolution=0.5
         )
-        self.min_pull_in_slider.set(self.store["min_pull_in"] * 100)
+        self.min_pull_in_slider.set(self.app.store["min_pull_in"] * 100)
 
         # Left button
         self.min_pull_in_left_button = tk.Button(
@@ -104,10 +103,10 @@ class SeqAdjustmentWidget:
 
     def update(self):
         self.offset_entry.delete(0, tk.END)
-        self.offset_entry.insert(0, self.store["offset"])
+        self.offset_entry.insert(0, self.app.store["offset"])
 
-        self.min_pull_out_slider.set(self.store["min_pull_out"] * 100)
-        self.min_pull_in_slider.set(self.store["min_pull_in"] * 100)
+        self.min_pull_out_slider.set(self.app.store["min_pull_out"] * 100)
+        self.min_pull_in_slider.set(self.app.store["min_pull_in"] * 100)
 
     def save(self):
         errors = []
@@ -115,11 +114,11 @@ class SeqAdjustmentWidget:
         if not validate_offset(offset):
             errors.append("Invalid offset format. Expected a decimal compatible value")
             self.offset_entry.delete(0, tk.END)
-            self.offset_entry.insert(0, self.store.get("offset", ""))
+            self.offset_entry.insert(0, self.app.store.get("offset", ""))
         else:
-            self.store["offset"] = float(offset)
+            self.app.store["offset"] = float(offset)
 
-        self.store["min_pull_out"] = self.min_pull_out_slider.get() / 100
-        self.store["min_pull_in"] = self.min_pull_in_slider.get() / 100
+        self.app.store["min_pull_out"] = self.min_pull_out_slider.get() / 100
+        self.app.store["min_pull_in"] = self.min_pull_in_slider.get() / 100
 
         return errors
