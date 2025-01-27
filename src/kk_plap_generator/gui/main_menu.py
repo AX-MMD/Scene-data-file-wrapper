@@ -200,9 +200,11 @@ class PlapUI(tk.Frame):
         screen_height = root.winfo_screenheight()
         window_width = max(640, min(854, screen_width // 3))
         window_height = max(360, min(480, screen_height // 3))
+        x = (screen_width // 2) - (window_width // 2)
+        y = (screen_height // 2) - (window_height // 2)
         root.title("PLAP Generator")
         root.minsize(600, 360)
-        root.geometry(f"{window_width}x{window_height}")
+        root.geometry(f"{window_width}x{window_height}+{x}+{y}")
         return root
 
     @classmethod

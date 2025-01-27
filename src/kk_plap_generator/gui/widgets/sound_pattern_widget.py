@@ -29,20 +29,20 @@ class SoundPatternWidget:
 
         # The pattern looks bad here but it's good on the display
         info_message = """
-        [------------------------------- Customization -------------------------------]
+[-------------------------- Customization ---------------------------]
 
-        ::: Sound Pattern :::
-        PLAP generator will create a sequence of keyframes for each of your sound folders.
-        The sound pattern is what determines the order of activation of your folder.
-        For example, if you have 4 folders named Plap1-4, and your pattern is "W",
-        the generated keyframes for Timeline will look like this:
-        _______
-        |Plap1|  ◆                 ◆                     ◆
-        |Plap2|    ◆     ◆     ◆  ◆      ◆      ◆   ◆  and so on...
-        |Plap3|      ◆ ◆ ◆ ◆      ◆  ◆ ◆ ◆
-        |Plap4|        ◆     ◆          ◆       ◆
-        =====
-        You combine multiple letters to create a more complex pattern.
+::: Sound Pattern :::
+PLAP generator will create a sequence of keyframes for each of your sound folders.
+The sound pattern is what determines the order of activation of your folder.
+For example, if you have 4 folders named Plap1-4, and your pattern is "W", the generated keyframes for Timeline will look like this:
+_______
+|Plap1|  ◆               ◆                 ◆
+|Plap2|    ◆     ◆     ◆  ◆      ◆     ◆  ◆  and so on...
+|Plap3|      ◆  ◆ ◆ ◆      ◆  ◆  ◆  ◆
+|Plap4|        ◆    ◆         ◆      ◆
+=====
+
+You combine multiple letters to create a more complex pattern.
 
         """
         self.top_right_frame = InfoMessageFrame(self.top_frame, info_message)
@@ -71,7 +71,6 @@ class SoundPatternWidget:
         self.clear_pattern_string_button = tk.Button(
             self.pattern_string_frame,
             text="Clear ✖",
-            fg="red",
             command=self.clear_pattern_string,
         )
         self.clear_pattern_string_button.pack()

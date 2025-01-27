@@ -1,19 +1,21 @@
 import tkinter as tk
 from tkinter import simpledialog
 
+from kk_plap_generator.gui.output_mesage_box import CustomMessageBox
+
 
 class InfoMessageFrame:
-    def __init__(self, masterframe, message, fg="black"):
+    def __init__(self, masterframe, message, text="ℹ", fg="black"):
         self.message = message
         self.top_right_frame = tk.Frame(masterframe)
         self.top_right_frame.pack(side=tk.RIGHT)
         self.info_button = tk.Button(
-            self.top_right_frame, text="ℹ", fg=fg, command=self.show_info
+            self.top_right_frame, text=text, fg=fg, command=self.show_info
         )
         self.info_button.pack(side=tk.RIGHT)
 
     def show_info(self):
-        CustomInfoDialog(self.top_right_frame, self.message, title="Information")
+        CustomMessageBox(self.top_right_frame, "Information", self.message)
 
 
 class CustomInfoDialog(simpledialog.Dialog):
