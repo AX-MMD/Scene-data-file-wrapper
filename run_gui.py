@@ -1,4 +1,4 @@
-from .gui import PlapUI
+from kk_plap_generator.gui import PlapUI
 
 # Run PlapUI
 
