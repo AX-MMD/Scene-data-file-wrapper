@@ -8,13 +8,15 @@ import toml
 from kk_plap_generator import settings
 from kk_plap_generator.generator.plap_generator import NodeNotFoundError, PlapGenerator
 from kk_plap_generator.generator.utils import generate_plaps
-from kk_plap_generator.gui.dnd_widget import DnDWidget
 from kk_plap_generator.gui.output_mesage_box import CustomMessageBox
-from kk_plap_generator.gui.ref_interpolable_widget import RefInterpolableWidget
-from kk_plap_generator.gui.seq_adjustment_widget import SeqAdjustmentWidget
-from kk_plap_generator.gui.sound_folders_widget import SoundFoldersWidget
-from kk_plap_generator.gui.sound_pattern_widget import SoundPatternWidget
-from kk_plap_generator.gui.time_ranges_widget import TimeRangesWidget
+from kk_plap_generator.gui.widgets import (
+    DnDWidget,
+    RefInterpolableWidget,
+    SeqAdjustmentWidget,
+    SoundFoldersWidget,
+    SoundPatternWidget,
+    TimeRangesWidget,
+)
 
 
 class PlapUI(tk.Frame):
