@@ -1,6 +1,6 @@
 #######################   Parameters Reference   #############################
 
-                    #->> Check readme.txt first <<--#
+                    #->> THIS IS OUTDATED <<--#
 
 [[plap_group]]
 # You can define multiple [[plap_group]] with each having distinct settings.
@@ -35,22 +35,25 @@ ref_keyframe_time = "00:00.000"
 ###############################################################################
 
 ### CUSTOMIZATION #############################################################
-# Offset in seconds, in case you don't want the sfx to be timed exactly with the 
-# reference keyframes. Can be positive or negative.
+# Offset in seconds, in case you don't want the sfx to be timed exactly with 
+# the reference keyframes. Can be positive or negative.
 offset = 0.0
 
-# Minimum percent distance (0.0 to 1.0) before re-enabling plaps.
+# Minimum percent distance (0.0 to 1.0) the subject needs to pull away from the
+# contact point before re-enabling plaps.
 # Prevents spam if the subject is making micro moves when fully inserted.
-min_pull_out = 0.20
+min_pull_out = 0.80
 
-# Error margin in case some insertions are not 100% complete.
-# This is to make sure sounds can register even if the subject moves a bit
-min_pull_in = 0.20
+# Minimum percent distance (0.0 to 1.0) the subject needs to push toward the 
+# contact point for a plap to register.
+# This is in case the contact point gets closer and the subject does not need
+# thrust as far.
+min_push_in = 0.80
 
-# Disabled y default, sfx starts at 00:00.00000 and continue to the end.
+# By default sfx starts at 00:00.00000 and continue to the end.
 # You can have a different start point, end point or multiple.
 # Exemple with 2 ranges: [["00:01.5", "00:05.0"], ["00:10.5", "00:15.0"]]
-# If you give a custom range, you must put both a start and end point.
+# If you give a custom range, you must put both a Start and Stop point.
 time_ranges = []
 
 # V pattern goes from first folder to last to first repetively (1-2-3-4-3-2-1)
