@@ -26,7 +26,7 @@ GOTO error
 	GOTO :EOF
 
 :test
-	pytest --cov
+	pytest %project_name%
 	GOTO :EOF
 
 :error

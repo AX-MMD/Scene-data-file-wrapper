@@ -19,7 +19,7 @@ need_update:
 
 .PHONY: test
 test:
-	pytest --cov
+	pytest $(project_name)
 .PHONY: all
 
 all: lint test
