@@ -124,6 +124,7 @@ class PlapUI(tk.Frame):
         self.plap_config = self.load_config(use_default=True)
         self.store = self.plap_config.get("plap_group")[0]
         self.update_widgets()
+        self.dnd_widget.reset_single_file()
 
     def save_button_action(self):
         self.save_config()
@@ -154,18 +155,27 @@ class PlapUI(tk.Frame):
                 output = generate_plaps(
                     self.dnd_widget.get_single_file(), self.plap_config["plap_group"]
                 )
-                CustomMessageBox(self, "Success ✔", "\n".join(output))
+                CustomMessageBox(
+                    self, "Success ✔", "::: Success :::\n\n" + "\n".join(output)
+                )
             except NodeNotFoundError as e:
-                message = f"::: Node not found :::\n"
-                message += f"\n> Missing node: {e.node_name}"
-                if e.tag == "name":
-                    message += f"\n> Could not find the parent group {e.value} in the xml file."
-                    message += f"\n> Make sure the path \"{self.store['interpolable_path']}\" is correct."
-                else:
-                    message += f"\n> Could not find the interpolable {e.value} in the xml file."
-                    message += f"\n> Make sure you renamed the interpolable to \"{self.store['interpolable_path'].split('.')[-1]}\","
-                    message += f"\n  in CharacterStudio even if that was already the name."
+                if e.xml_path is not None:
+                    CustomMessageBox(self, "Failled ✖", traceback.format_exc())
+
+                message = "::: Node not found :::\n"
+                message += f"\n> Missing node: {e.get_node_string()}"
+                if e.node_name == "interpolableGroup":
+                    message += f'\n> Could not find the parent group\n    "{e.value}"\n  in the xml file.'
+                    message += f'\n> Make sure the path\n    "{self.store["interpolable_path"]}"\n is correct.'
+                elif e.node_name == "interpolable":
+                    message += f'\n> Could not find the interpolable\n    "{e.value}"\n  in the xml file.'
+                    message += f'\n> Make sure you renamed the interpolable to\n    "{self.store["interpolable_path"].split(".")[-1]}"'
+                    message += (
+                        "\n  in the Timeline, even if that was already the original name."
+                    )
                     message += "\n  This is needed so an alias is created."
+                else:
+                    message += f'\n> Could not find the node\n    "{e.node_name}"\n  in the xml file.'
                 CustomMessageBox(self, "Failled ✖", message)
             except Exception:
                 CustomMessageBox(self, "Failled ✖", traceback.format_exc())

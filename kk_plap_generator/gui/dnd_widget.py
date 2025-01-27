@@ -33,6 +33,10 @@ class DnDWidget:
     def get_single_file(self):
         return self.single_file
 
+    def reset_single_file(self):
+        self.single_file = None
+        self.drag_drop_label.config(text="Drop the Single File here")
+
     def on_drop(self, event):
         self.single_file = event.data[1:-1]
         self.drag_drop_label.config(

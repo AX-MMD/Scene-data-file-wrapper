@@ -31,7 +31,22 @@ class SeqAdjustmentWidget:
         self.offset_entry.insert(0, self.app.store["offset"])
         self.offset_entry.pack()
 
-        self.top_right_frame = InfoMessageFrame(self.top_frame, "Seq adjustment info")
+        info_message = """
+        ::: Offset :::
+        Offset in seconds, in case you don't want the sfx to be timed exactly with the
+        reference keyframes. Can be positive or negative.
+
+        ::: Minimum Pull Out % :::
+        The generator calculate the distance traveled away from the reference keyframe.
+        Here you can set the minimum outward distance (%) required before re-enabling plaps.
+        This is to prevents spam if the subject is making micro in-out moves when fully inserted.
+
+        ::: Minimum Push In % :::
+        The generator calculate the distance traveled away from the reference keyframe.
+        Here you can set the minimum outward distance (%) required before re-enabling plaps.
+        This is to prevents spam if the subject is making micro in-out moves when fully inserted.
+        """
+        self.top_right_frame = InfoMessageFrame(self.top_frame, info_message)
 
         # Min Pull Out
         self.min_pull_out_label = tk.Label(self.offset_frame, text="Minimum Pull Out %")
@@ -65,35 +80,35 @@ class SeqAdjustmentWidget:
         self.min_pull_out_right_button.pack(side=tk.LEFT)
 
         # Min Pull In
-        self.min_pull_in_label = tk.Label(self.offset_frame, text="Minimum Pull In %")
-        self.min_pull_in_label.pack()
-        self.min_pull_in_frame = tk.Frame(self.offset_frame)
-        self.min_pull_in_frame.pack()
+        self.min_push_in_label = tk.Label(self.offset_frame, text="Minimum Pull In %")
+        self.min_push_in_label.pack()
+        self.min_push_in_frame = tk.Frame(self.offset_frame)
+        self.min_push_in_frame.pack()
         # Slider
-        self.min_pull_in_slider = tk.Scale(
-            self.min_pull_in_frame, from_=0, to=100, orient=tk.HORIZONTAL, resolution=0.5
+        self.min_push_in_slider = tk.Scale(
+            self.min_push_in_frame, from_=0, to=100, orient=tk.HORIZONTAL, resolution=0.5
         )
-        self.min_pull_in_slider.set(self.app.store["min_pull_in"] * 100)
+        self.min_push_in_slider.set(self.app.store["min_push_in"] * 100)
 
         # Left button
-        self.min_pull_in_left_button = tk.Button(
-            self.min_pull_in_frame,
+        self.min_push_in_left_button = tk.Button(
+            self.min_push_in_frame,
             text="<",
-            command=lambda: self.adjust_slider(self.min_pull_in_slider, -0.5),
+            command=lambda: self.adjust_slider(self.min_push_in_slider, -0.5),
             height=1,
         )
 
         # Right button
-        self.min_pull_in_right_button = tk.Button(
-            self.min_pull_in_frame,
+        self.min_push_in_right_button = tk.Button(
+            self.min_push_in_frame,
             text=">",
-            command=lambda: self.adjust_slider(self.min_pull_in_slider, 0.5),
+            command=lambda: self.adjust_slider(self.min_push_in_slider, 0.5),
             height=1,
         )
 
-        self.min_pull_in_left_button.pack(side=tk.LEFT, fill=tk.X)
-        self.min_pull_in_slider.pack(side=tk.LEFT, fill=tk.X, expand=True)
-        self.min_pull_in_right_button.pack(side=tk.LEFT)
+        self.min_push_in_left_button.pack(side=tk.LEFT, fill=tk.X)
+        self.min_push_in_slider.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        self.min_push_in_right_button.pack(side=tk.LEFT)
 
     def adjust_slider(self, slider, increment):
         current_value = slider.get()
@@ -106,7 +121,7 @@ class SeqAdjustmentWidget:
         self.offset_entry.insert(0, self.app.store["offset"])
 
         self.min_pull_out_slider.set(self.app.store["min_pull_out"] * 100)
-        self.min_pull_in_slider.set(self.app.store["min_pull_in"] * 100)
+        self.min_push_in_slider.set(self.app.store["min_push_in"] * 100)
 
     def save(self):
         errors = []
@@ -119,6 +134,6 @@ class SeqAdjustmentWidget:
             self.app.store["offset"] = float(offset)
 
         self.app.store["min_pull_out"] = self.min_pull_out_slider.get() / 100
-        self.app.store["min_pull_in"] = self.min_pull_in_slider.get() / 100
+        self.app.store["min_push_in"] = self.min_push_in_slider.get() / 100
 
         return errors

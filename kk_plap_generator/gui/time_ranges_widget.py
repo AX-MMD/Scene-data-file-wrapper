@@ -29,7 +29,17 @@ class TimeRangesWidget:
         self.time_ranges_label = tk.Label(self.top_left_frame, text="Time Ranges")
         self.time_ranges_label.pack()
 
-        self.top_right_frame = InfoMessageFrame(self.top_frame, "Time Ranges info")
+        info_text = """
+        By default the generator will try to make keyframes starting from 00:00.00.
+        You can have a different start point, end point or multiple ranges.
+
+        For exemple, if you give the ranges 00:01.5, 00:05.0 and 00:10.5, 00:15.0 the
+        generator will try to make keyframes only at those points.
+
+        !!! If you give a custom range, you must put both a Start and Stop point. !!!
+        """
+
+        self.top_right_frame = InfoMessageFrame(self.top_frame, info_text)
 
         self.time_ranges_listbox = tk.Listbox(self.time_ranges_frame)
         self.time_ranges_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)

@@ -23,7 +23,7 @@ class CustomInfoDialog(simpledialog.Dialog):
         super().__init__(parent, title)
 
     def body(self, master):
-        tk.Label(master, text=self.message).pack(padx=20, pady=20)
+        tk.Label(master, text=self.message, justify="left").pack(padx=20, pady=20)
         return master
 
     def buttonbox(self):
