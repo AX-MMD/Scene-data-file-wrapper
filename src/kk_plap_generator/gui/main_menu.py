@@ -122,7 +122,12 @@ class PlapUI(tk.Frame):
 
     def reset_button_action(self):
         self.plap_config = self.load_config(use_default=True)
-        self.store = self.plap_config.get("plap_group")[0]
+        loaded_store = self.plap_config.get("plap_group")[0]
+        loaded_store.update(
+            interpolable_path=self.store["interpolable_path"],
+            ref_keyframe_time=self.store["ref_keyframe_time"],
+        )
+        self.store = loaded_store
         self.update_widgets()
         self.dnd_widget.reset_single_file()
 
