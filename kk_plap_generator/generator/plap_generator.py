@@ -47,6 +47,12 @@ class PlapGenerator:
 
     VALID_PATTERN_CHARS = ["V", "A", "W", "M", "\\", "/"]
 
+    class ReferenceNotFoundError(Exception):
+        def __init__(self, time: str):
+            self.time = time
+            self.message = f"Reference keyframe not found at {time}."
+            super().__init__(self.message)
+
     def __init__(
         self,
         interpolable_path: str,
@@ -78,23 +84,7 @@ class PlapGenerator:
         self.template_path = template_path
         # config file params END ###
 
-        # fmt: off
-        self.patterns: Dict[str, List[int]] = {
-            "W": [i for i in range(self.plap_count)] \
-                + [i for i in range(self.plap_count - 2, int(math.ceil(self.plap_count / 2)) - 1, -1)] \
-                + [i for i in range(int(math.ceil(self.plap_count / 2)) - 1, self.plap_count - 1)] \
-                + [i for i in range(self.plap_count - 1, 0, -1)],
-            "M": [i for i in range(self.plap_count - 1, -1, -1)] \
-                + [i for i in range(1, int(math.ceil(self.plap_count / 2)) + 1)] \
-                + [i for i in range(int(math.ceil(self.plap_count / 2)) - 1, 0, -1)] \
-                + [i for i in range(self.plap_count - 1)],
-            "V": [i for i in range(self.plap_count)] + [i for i in range(self.plap_count - 2, 0, -1)],
-            "A": [i for i in range(self.plap_count - 1, 0, -1)] + [i for i in range(self.plap_count - 1)],
-            "/": [i for i in range(self.plap_count - 1, -1, -1)],
-            "\\": [i for i in range(self.plap_count)],
-        }
-        # fmt: on
-
+        self.patterns: Dict[str, List[int]] = self.get_patterns()
         self.sequence = self.generate_sequence(pattern_string)
 
     @property
@@ -266,7 +256,7 @@ class PlapGenerator:
                 break
 
         if reference is None:
-            raise NodeNotFoundError("The reference keyframe was not found.")
+            raise PlapGenerator.ReferenceNotFoundError(self.ref_keyframe_time)
         else:
             # Once we found the reference keyframe, we check the next keyframe and calculate the difference between reference and next_keyframe.
             # The axis with the biggest difference will be our axis reference.
@@ -307,6 +297,24 @@ class PlapGenerator:
             estimated_pull_out=estimated_pull_out,
         )
 
+    def get_patterns(self) -> Dict[str, List[int]]:
+        # fmt: off
+        return {
+            "W": [i for i in range(self.plap_count)] \
+                + [i for i in range(self.plap_count - 2, int(math.ceil(self.plap_count / 2)) - 1, -1)] \
+                + [i for i in range(int(math.ceil(self.plap_count / 2)) - 1, self.plap_count - 1)] \
+                + [i for i in range(self.plap_count - 1, 0, -1)],
+            "M": [i for i in range(self.plap_count - 1, -1, -1)] \
+                + [i for i in range(1, int(math.ceil(self.plap_count / 2)) + 1)] \
+                + [i for i in range(int(math.ceil(self.plap_count / 2)) - 1, 0, -1)] \
+                + [i for i in range(self.plap_count - 1)],
+            "V": [i for i in range(self.plap_count)] + [i for i in range(self.plap_count - 2, 0, -1)],
+            "A": [i for i in range(self.plap_count - 1, 0, -1)] + [i for i in range(self.plap_count - 1)],
+            "/": [i for i in range(self.plap_count - 1, -1, -1)],
+            "\\": [i for i in range(self.plap_count)],
+        }
+        # fmt: on
+    
     def _get_pattern_for_char(self, pattern_char: str) -> List[int]:
         return self.patterns[pattern_char]
 

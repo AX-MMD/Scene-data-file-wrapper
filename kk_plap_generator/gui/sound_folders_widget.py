@@ -29,7 +29,14 @@ class SoundFoldersWidget:
         self.sound_folders_label = tk.Label(self.top_left_frame, text="Sound Folders")
         self.sound_folders_label.pack()
 
-        self.top_right_frame = InfoMessageFrame(self.top_frame, "Sound Folders info")
+        info_message = """
+        [------------------------------- Customization -------------------------------]
+
+        ::: Sound Folders :::
+        Here you tell the generator what are the names of your sound folders in 
+        Charastudio (folderscontaining your sound items).
+        """
+        self.top_right_frame = InfoMessageFrame(self.top_frame, info_message)
 
         self.sound_folders_listbox = tk.Listbox(self.sound_folders_frame)
         self.sound_folders_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)

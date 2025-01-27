@@ -32,19 +32,30 @@ class SeqAdjustmentWidget:
         self.offset_entry.pack()
 
         info_message = """
+        [-------------------------------- Adjustments --------------------------------]
+        
+        These settings are only used for corrections, only change them if there is 
+        to much plaps, not enough plaps, or the plaps are not synced with the reference.
+
         ::: Offset :::
         Offset in seconds, in case you don't want the sfx to be timed exactly with the
         reference keyframes. Can be positive or negative.
 
         ::: Minimum Pull Out % :::
-        The generator calculate the distance traveled away from the reference keyframe.
-        Here you can set the minimum outward distance (%) required before re-enabling plaps.
-        This is to prevents spam if the subject is making micro in-out moves when fully inserted.
+        The generator estimates the distance traveled by the subject for each plap,
+        here you can set what (%) of that distance the subject needs to pull away from 
+        the contact point before re-enabling plaps.
+
+        This is to prevents spam if the subject is making micro in-out moves when 
+        fully inserted.
 
         ::: Minimum Push In % :::
-        The generator calculate the distance traveled away from the reference keyframe.
-        Here you can set the minimum outward distance (%) required before re-enabling plaps.
-        This is to prevents spam if the subject is making micro in-out moves when fully inserted.
+        The generator estimates the distance traveled by the subject for each plap,
+        here you can set what (%) of that distance the subject needs to push toward the 
+        contact point for a plap to register.
+        
+        This is in case the contact point gets closer and the subject does not need to
+        thrust as far.
         """
         self.top_right_frame = InfoMessageFrame(self.top_frame, info_message)
 
@@ -79,8 +90,8 @@ class SeqAdjustmentWidget:
         self.min_pull_out_slider.pack(side=tk.LEFT, fill=tk.X, expand=True)
         self.min_pull_out_right_button.pack(side=tk.LEFT)
 
-        # Min Pull In
-        self.min_push_in_label = tk.Label(self.offset_frame, text="Minimum Pull In %")
+        # Min Push In
+        self.min_push_in_label = tk.Label(self.offset_frame, text="Minimum Push In %")
         self.min_push_in_label.pack()
         self.min_push_in_frame = tk.Frame(self.offset_frame)
         self.min_push_in_frame.pack()

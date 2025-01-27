@@ -30,6 +30,9 @@ class TimeRangesWidget:
         self.time_ranges_label.pack()
 
         info_text = """
+        [-------------------------------- Adjustments --------------------------------]
+
+        ::: Time Ranges :::  
         By default the generator will try to make keyframes starting from 00:00.00.
         You can have a different start point, end point or multiple ranges.
 

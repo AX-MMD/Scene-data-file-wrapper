@@ -6,7 +6,7 @@ import tkinterdnd2
 import toml
 
 from kk_plap_generator import settings
-from kk_plap_generator.generator.plap_generator import NodeNotFoundError
+from kk_plap_generator.generator.plap_generator import NodeNotFoundError, PlapGenerator
 from kk_plap_generator.generator.utils import generate_plaps
 from kk_plap_generator.gui.dnd_widget import DnDWidget
 from kk_plap_generator.gui.output_mesage_box import CustomMessageBox
@@ -177,6 +177,12 @@ class PlapUI(tk.Frame):
                 else:
                     message += f'\n> Could not find the node\n    "{e.node_name}"\n  in the xml file.'
                 CustomMessageBox(self, "Failled ✖", message)
+            except PlapGenerator.ReferenceNotFoundError as e:
+                CustomMessageBox(
+                    self,
+                    "Failled ✖",
+                    f"::: Reference not found :::\n\n> Could not find the reference keyframe at {e.time}",
+                )
             except Exception:
                 CustomMessageBox(self, "Failled ✖", traceback.format_exc())
 

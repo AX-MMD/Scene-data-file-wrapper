@@ -3,12 +3,12 @@ from tkinter import simpledialog
 
 
 class InfoMessageFrame:
-    def __init__(self, masterframe, message):
+    def __init__(self, masterframe, message, fg="black"):
         self.message = message
         self.top_right_frame = tk.Frame(masterframe)
         self.top_right_frame.pack(side=tk.RIGHT)
         self.info_button = tk.Button(
-            self.top_right_frame, text="ℹ", command=self.show_info
+            self.top_right_frame, text="ℹ", fg=fg, command=self.show_info
         )
         self.info_button.pack(side=tk.RIGHT)
 

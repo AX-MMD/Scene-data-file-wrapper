@@ -27,7 +27,25 @@ class SoundPatternWidget:
         self.pattern_string_label = tk.Label(self.top_left_frame, text="Sound Pattern")
         self.pattern_string_label.pack()
 
-        self.top_right_frame = InfoMessageFrame(self.top_frame, "Sound Pattern info")
+        # The pattern looks bad here but it's good on the display
+        info_message = """
+        [------------------------------- Customization -------------------------------]
+
+        ::: Sound Pattern :::
+        PLAP generator will create a sequence of keyframes for each of your sound folders.
+        The sound pattern is what determines the order of activation of your folder.
+        For example, if you have 4 folders named Plap1-4, and your pattern is "W", 
+        the generated keyframes for Timeline will look like this:
+        _______
+        |Plap1|  ◆                 ◆                     ◆
+        |Plap2|    ◆     ◆     ◆  ◆      ◆      ◆   ◆  and so on...
+        |Plap3|      ◆ ◆ ◆ ◆      ◆  ◆ ◆ ◆
+        |Plap4|        ◆     ◆          ◆       ◆
+        =====
+        You combine multiple letters to create a more complex pattern.
+    
+        """
+        self.top_right_frame = InfoMessageFrame(self.top_frame, info_message)
 
         # Pattern value display
         self.pattern_string_value = tk.Label(

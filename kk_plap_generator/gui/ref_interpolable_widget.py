@@ -30,9 +30,51 @@ class RefInterpolableWidget:
         )
         self.ref_keyframe_time_label.pack()
 
-        self.top_right_frame = InfoMessageFrame(
-            self.top_frame, "Reference Interpolable info"
-        )
+        info_message = """
+        [--------------------------------- Required ----------------------------------]
+        ::: Reference Interpolable :::  
+        This program uses a Timeline interpolable as reference to generate a sound sequence.
+
+        [In CharaStudio]
+        > Choose an interpolable like "GO Pos Waist", Hips, Dick, etc. Rotation is fine too.
+        > Rename it with an alias, can also just Rename -> ctrl+X -> ctrl+V.
+        > Use the Timeline export function, Timeline -> Single Files -> Save.
+        > Choose a keyframe where your chosen interpolable is fully extended:
+          -- Dick pushed in the female.
+          -- Female pushed on dick (if she's the one moving).
+          -- It can be whatever is the apex/movement of your interpolable.
+        > Copy the exact Name of that interpolable.
+        > Copy the exact Time of that interpolable.
+
+        [In PLAP generator]
+        The generator needs the Path and Time of the interpolable to use as reference.
+
+        If the interpolable is not part of a group, you can just use its name.
+        If it is part of a group, here is an exemple:
+
+        Your interpolable "Pos Waist" is part of a group(s), and the reference
+        keyframe is at "00:02.454"
+         __________
+        |  Main    |
+        ------------
+         |   male   |       00:02.454
+         ------------        ⇓
+          |Pos Waist|    ◆◆◆ ◆◆◆ ◆◆◆       ◆◆ ◆◆ ◆◆◆◆◆◆
+           ---------
+        
+        Path = Main.male.Pos Waist
+        Time = 00:02.454
+        """
+        self.top_right_frame = InfoMessageFrame(self.top_frame, info_message, fg="red")
+
+        # Interpolable Path
+        self.path_frame = tk.Frame(self.ref_keyframe_time_frame)
+        self.path_frame.pack(fill=tk.X, padx=5, pady=5)
+        self.path_label = tk.Label(self.path_frame, text="Path")
+        self.path_label.pack(side=tk.LEFT)
+        self.interpolable_path_entry = tk.Entry(self.path_frame)
+        self.interpolable_path_entry.insert(0, self.app.store["interpolable_path"])
+        self.interpolable_path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
         # Reference keyframe Time
         self.time_frame = tk.Frame(self.ref_keyframe_time_frame)
@@ -44,14 +86,6 @@ class RefInterpolableWidget:
         self.ref_keyframe_time_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
         self.time_format_label = tk.Label(self.time_frame, text="MM:SS.SS")
         self.time_format_label.pack(side=tk.RIGHT)
-        # Interpolable Path
-        self.path_frame = tk.Frame(self.ref_keyframe_time_frame)
-        self.path_frame.pack(fill=tk.X, padx=5, pady=5)
-        self.path_label = tk.Label(self.path_frame, text="Path")
-        self.path_label.pack(side=tk.LEFT)
-        self.interpolable_path_entry = tk.Entry(self.path_frame)
-        self.interpolable_path_entry.insert(0, self.app.store["interpolable_path"])
-        self.interpolable_path_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
     def update(self):
         self.ref_keyframe_time_entry.delete(0, tk.END)
