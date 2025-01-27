@@ -33,7 +33,7 @@ class SoundFoldersWidget:
         [------------------------------- Customization -------------------------------]
 
         ::: Sound Folders :::
-        Here you tell the generator what are the names of your sound folders in 
+        Here you tell the generator what are the names of your sound folders in
         Charastudio (folderscontaining your sound items).
         """
         self.top_right_frame = InfoMessageFrame(self.top_frame, info_message)

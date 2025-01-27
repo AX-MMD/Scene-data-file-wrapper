@@ -180,44 +180,35 @@ class PlapGenerator:
         for time_start, time_end in self.get_time_ranges_sec():
             did_plap = False
 
-            for i, keyframe in enumerate(keyframes):
+            for keyframe in keyframes:
                 time = self._std_time(keyframe.get("time", 0.0))
                 if time <= time_start:
                     continue
-                elif time > time_end:
+                if time > time_end:
                     # Reached the end of the time range
                     break
-                elif did_plap is True:
+
+                value = keyframe_get(keyframe, reference.axis)
+                distance = abs(reference.value - value)
+                if did_plap:
                     if (
                         reference.out_direction == 1
-                        and keyframe_get(keyframe, reference.axis) > reference.value
-                        and abs(reference.value - keyframe_get(keyframe, reference.axis))
-                        >= self._round(
-                            self.min_pull_out * reference.estimated_pull_out
-                        )  # round to avoid floating point errors
-                    ) or (
-                        reference.out_direction == -1
-                        and keyframe_get(keyframe, reference.axis) < reference.value
-                        and abs(reference.value - keyframe_get(keyframe, reference.axis))
-                        >= self._round(self.min_pull_out * reference.estimated_pull_out)
+                        and value > reference.value
+                        or reference.out_direction == -1
+                        and value < reference.value
+                    ) and distance >= self._round(  # # Round to avoid floating point errors
+                        self.min_pull_out * reference.estimated_pull_out
                     ):
                         # Only re-enable plapping after a minimum distance is reached
                         did_plap = False
-                elif not did_plap:
+                else:
                     if (
                         reference.out_direction == 1
-                        and keyframe_get(keyframe, reference.axis) <= reference.value
-                        or abs(reference.value - keyframe_get(keyframe, reference.axis))
-                        < self._round(
-                            (1.0 - self.min_push_in) * reference.estimated_pull_out
-                        )
-                    ) or (
-                        reference.out_direction == -1
-                        and keyframe_get(keyframe, reference.axis) >= reference.value
-                        or abs(reference.value - keyframe_get(keyframe, reference.axis))
-                        < self._round(
-                            (1.0 - self.min_push_in) * reference.estimated_pull_out
-                        )
+                        and value <= reference.value
+                        or reference.out_direction == -1
+                        and value >= reference.value
+                    ) or distance < self._round(
+                        (1.0 - self.min_push_in) * reference.estimated_pull_out
                     ):
                         keyframe_times.append(time)
                         did_plap = True
@@ -270,6 +261,7 @@ class PlapGenerator:
             x = keyframe_get(next_frame, "valueX") - reference.valueX
             y = keyframe_get(next_frame, "valueY") - reference.valueY
             z = keyframe_get(next_frame, "valueZ") - reference.valueZ
+
             if abs(z) < abs(x) > abs(y):
                 axis = "valueX"
                 out_direction = x / abs(x)
@@ -314,7 +306,7 @@ class PlapGenerator:
             "\\": [i for i in range(self.plap_count)],
         }
         # fmt: on
-    
+
     def _get_pattern_for_char(self, pattern_char: str) -> List[int]:
         return self.patterns[pattern_char]
 

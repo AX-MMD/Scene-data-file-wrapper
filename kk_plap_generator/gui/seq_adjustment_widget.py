@@ -33,8 +33,8 @@ class SeqAdjustmentWidget:
 
         info_message = """
         [-------------------------------- Adjustments --------------------------------]
-        
-        These settings are only used for corrections, only change them if there is 
+
+        These settings are only used for corrections, only change them if there is
         to much plaps, not enough plaps, or the plaps are not synced with the reference.
 
         ::: Offset :::
@@ -43,17 +43,17 @@ class SeqAdjustmentWidget:
 
         ::: Minimum Pull Out % :::
         The generator estimates the distance traveled by the subject for each plap,
-        here you can set what (%) of that distance the subject needs to pull away from 
+        here you can set what (%) of that distance the subject needs to pull away from
         the contact point before re-enabling plaps.
 
-        This is to prevents spam if the subject is making micro in-out moves when 
+        This is to prevents spam if the subject is making micro in-out moves when
         fully inserted.
 
         ::: Minimum Push In % :::
         The generator estimates the distance traveled by the subject for each plap,
-        here you can set what (%) of that distance the subject needs to push toward the 
+        here you can set what (%) of that distance the subject needs to push toward the
         contact point for a plap to register.
-        
+
         This is in case the contact point gets closer and the subject does not need to
         thrust as far.
         """

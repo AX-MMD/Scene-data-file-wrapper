@@ -32,7 +32,7 @@ class RefInterpolableWidget:
 
         info_message = """
         [--------------------------------- Required ----------------------------------]
-        ::: Reference Interpolable :::  
+        ::: Reference Interpolable :::
         This program uses a Timeline interpolable as reference to generate a sound sequence.
 
         [In CharaStudio]
@@ -61,7 +61,7 @@ class RefInterpolableWidget:
          ------------        ⇓
           |Pos Waist|    ◆◆◆ ◆◆◆ ◆◆◆       ◆◆ ◆◆ ◆◆◆◆◆◆
            ---------
-        
+
         Path = Main.male.Pos Waist
         Time = 00:02.454
         """

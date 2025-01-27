@@ -34,7 +34,7 @@ class SoundPatternWidget:
         ::: Sound Pattern :::
         PLAP generator will create a sequence of keyframes for each of your sound folders.
         The sound pattern is what determines the order of activation of your folder.
-        For example, if you have 4 folders named Plap1-4, and your pattern is "W", 
+        For example, if you have 4 folders named Plap1-4, and your pattern is "W",
         the generated keyframes for Timeline will look like this:
         _______
         |Plap1|  ◆                 ◆                     ◆
@@ -43,7 +43,7 @@ class SoundPatternWidget:
         |Plap4|        ◆     ◆          ◆       ◆
         =====
         You combine multiple letters to create a more complex pattern.
-    
+
         """
         self.top_right_frame = InfoMessageFrame(self.top_frame, info_message)
 
