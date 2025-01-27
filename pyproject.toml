@@ -6,16 +6,18 @@ authors = [
     {name = "AX-MMD",email = "ax.mmd.yt@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.12,<4.0"
+requires-python = ">=3.12,<3.14"
 package-mode = false
 dependencies = [
     "toml (>=0.10.2,<0.11.0)",
 ]
 
+
 [tool.poetry.group.lint.dependencies]
 mypy = "^1.14.1"
 ruff = "^0.9.3"
 types-toml = "^0.10.8.20240310"
+
 
 [tool.poetry.group.gui.dependencies]
 tkinterdnd2 = "^0.4.2"
@@ -23,6 +25,11 @@ tkinterdnd2 = "^0.4.2"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"
+
+
+[tool.poetry.group.release.dependencies]
+pyinstaller = "^6.11.1"
+
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
