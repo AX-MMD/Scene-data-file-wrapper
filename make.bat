@@ -1,7 +1,7 @@
 @echo off
 
-SET project_name=kk_plap_generator
-SET mypylint=mypy %project_name% --ignore-missing-imports --no-warn-unused-ignores --warn-redundant-casts --warn-unused-ignores --pretty --show-error-codes --check-untyped-defs
+SET project_path=src/kk_plap_generator
+SET mypylint=mypy %project_path% --ignore-missing-imports --no-warn-unused-ignores --warn-redundant-casts --warn-unused-ignores --pretty --show-error-codes --check-untyped-defs
 
 IF /I "%1"==".DEFAULT_GOAL " GOTO .DEFAULT_GOAL 
 IF /I "%1"=="format" GOTO format
@@ -15,7 +15,7 @@ GOTO error
 	GOTO :EOF
 
 :format
-	ruff format %project_name%
+	ruff format %project_path%
 	ruff check --fix
 	%mypylint%
 	GOTO :EOF
@@ -26,7 +26,7 @@ GOTO error
 	GOTO :EOF
 
 :test
-	pytest %project_name%
+	pytest %project_path%
 	GOTO :EOF
 
 :error

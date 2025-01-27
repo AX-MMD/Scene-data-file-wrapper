@@ -2,12 +2,12 @@
 
 
 a = Analysis(
-    ['run_gui.py'],
+    ['src\\run_gui.py'],
     pathex=[],
     binaries=[],
     datas=[],
     hiddenimports=[],
-    hookspath=['.'],
+    hookspath=['./src'],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[],
