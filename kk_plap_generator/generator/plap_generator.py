@@ -66,7 +66,7 @@ class PlapGenerator:
         self.min_pull_out = float(min_pull_out)
         self.min_push_in = float(min_push_in)
         self.time_ranges = time_ranges
-        self.pattern_string = pattern_string.capitalize()
+        self.pattern_string = pattern_string.upper()
         for pattern_char in self.pattern_string:
             if pattern_char not in self.VALID_PATTERN_CHARS:
                 raise ValueError(
