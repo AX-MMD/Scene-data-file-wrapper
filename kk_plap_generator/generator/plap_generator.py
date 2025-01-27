@@ -1,5 +1,4 @@
 import copy
-import itertools
 import math
 import os
 from dataclasses import dataclass
@@ -158,7 +157,7 @@ class PlapGenerator:
         # We find the reference keyframe and directionnal information
         reference = self.get_reference(keyframes)
 
-        keyframe_times = self.get_keyframe_times(keyframes, reference) 
+        keyframe_times = self.get_keyframe_times(keyframes, reference)
 
         # Create the plap nodes
         for i, plap_name in enumerate(self.plap_names):
@@ -184,13 +183,15 @@ class PlapGenerator:
 
         return sfx_node, len(keyframe_times), (keyframe_times[0], keyframe_times[-1])
 
-    def get_keyframe_times(self, keyframes: List[et.Element], reference: "KeyframeReference") -> List[float]:
+    def get_keyframe_times(
+        self, keyframes: List[et.Element], reference: "KeyframeReference"
+    ) -> List[float]:
         keyframe_times = []
         for time_start, time_end in self.get_time_ranges_sec():
             did_plap = False
 
             for i, keyframe in enumerate(keyframes):
-                time = self._std_time(keyframe.get("time"))
+                time = self._std_time(keyframe.get("time", 0.0))
                 if time <= time_start:
                     continue
                 elif time > time_end:
@@ -201,7 +202,9 @@ class PlapGenerator:
                         reference.out_direction == 1
                         and keyframe_get(keyframe, reference.axis) > reference.value
                         and abs(reference.value - keyframe_get(keyframe, reference.axis))
-                        >= self._round(self.min_pull_out * reference.estimated_pull_out) # round to avoid floating point errors
+                        >= self._round(
+                            self.min_pull_out * reference.estimated_pull_out
+                        )  # round to avoid floating point errors
                     ) or (
                         reference.out_direction == -1
                         and keyframe_get(keyframe, reference.axis) < reference.value
@@ -215,18 +218,21 @@ class PlapGenerator:
                         reference.out_direction == 1
                         and keyframe_get(keyframe, reference.axis) <= reference.value
                         or abs(reference.value - keyframe_get(keyframe, reference.axis))
-                        < self._round((1.0 - self.min_push_in) * reference.estimated_pull_out)
+                        < self._round(
+                            (1.0 - self.min_push_in) * reference.estimated_pull_out
+                        )
                     ) or (
                         reference.out_direction == -1
                         and keyframe_get(keyframe, reference.axis) >= reference.value
                         or abs(reference.value - keyframe_get(keyframe, reference.axis))
-                        < self._round((1.0 - self.min_push_in) * reference.estimated_pull_out)
+                        < self._round(
+                            (1.0 - self.min_push_in) * reference.estimated_pull_out
+                        )
                     ):
                         keyframe_times.append(time)
                         did_plap = True
 
         return keyframe_times
-
 
     def generate_sequence(self, pattern_string: str):
         last_index = len(pattern_string) - 1
@@ -303,7 +309,7 @@ class PlapGenerator:
 
     def _get_pattern_for_char(self, pattern_char: str) -> List[int]:
         return self.patterns[pattern_char]
-    
+
     def _round(self, value: float) -> float:
         return round(value, 5)
 
