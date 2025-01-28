@@ -42,7 +42,7 @@ offset = 0.0
 # Minimum percent distance (0.0 to 1.0) the subject needs to pull away from the
 # contact point before re-enabling plaps.
 # Prevents spam if the subject is making micro moves when fully inserted.
-min_pull_out = 0.80
+min_pull_out = 0.20
 
 # Minimum percent distance (0.0 to 1.0) the subject needs to push toward the 
 # contact point for a plap to register.

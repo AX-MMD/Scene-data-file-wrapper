@@ -58,7 +58,7 @@ class PlapGenerator:
         interpolable_path: str,
         ref_keyframe_time: str,
         offset: float = 0.0,
-        min_pull_out: float = 0.8,
+        min_pull_out: float = 0.2,
         min_push_in: float = 0.8,
         time_ranges: List[Tuple[str, str]] = [],
         pattern_string: str = "V",
@@ -365,9 +365,9 @@ class NodeNotFoundError(Exception):
     def __init__(
         self,
         node_name,
-        *args,
         tag: Optional[str] = None,
         value: Optional[str] = None,
+        *args,
         xml_path: Optional[str] = None,
     ):
         self.node_name = node_name
@@ -380,7 +380,7 @@ class NodeNotFoundError(Exception):
     def get_node_string(self):
         s = f"<{self.node_name}"
         s += (
-            f" {self.tag}{"='" + self.value + "'" if self.value else ''}'"
+            f" {self.tag}{("='" + self.value + "'") if self.value else ''}"
             if self.tag
             else ""
         )
