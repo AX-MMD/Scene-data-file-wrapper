@@ -1,84 +1,80 @@
 ### INSTALLATION ##############################################################
 
-Unzip the archive wherever you like, make sure config.toml, generate_plaps, and 
-template.xml are always together.
+Unzip the archive wherever you like, but make sure `/configs` and `/resources` 
+stays with the .exe file.
 
-### LIMITATIONS ###############################################################
+### INTRO #####################################################################
 
-This program uses a Timeline interpolable as reference to generate a sequence 
+PLAP generator uses a Timeline interpolable as reference to generate a sequence 
 to use with sound folders. It is meant to sync with a simple movement like 
 forward-backward, up-down, etc. 
 
-If the subject of that interpolable moves away from his point of origin, or 
-change his movement to much, the reference will be lost.
-
- [-- Advanced use case ------------------------------------------------------]
-  
-  That being said you can define multiple reference as well as the margin of 
-  error allowed, so if your subject moves to much you can adjust the margin or
-  define a time range for which each reference is valid.
-
-  see reference.toml for available customization.
-  see multi_ref.toml for an exemple of multiple references.
-
- [---------------------------------------------------------------------------]
+The process is as follows:
+- Export the Timeline Single File of your reference
+- Configure PLAP generator
+- Generate your PLAP files
+- Setup your scene (import `/resources/Plap1234.png` or make your own folders)
+- Import PLAP files to Timeline
 
 ### EXPORT TIMELINE SINGLE FILE ###############################################
 
-This program uses a Timeline interpolable as reference to generate a sequence.
+[In CharaStudio]
 * Choose an interpolable like "GO Pos Waist", Hips, Dick. Rotation is fine too.
 * Rename it with an alias, can also just Rename -> ctrl+X -> ctrl+V.
 * Click the owner of that interpolable in your Workspace then
   Timeline -> Single Files -> Save.
 
-### CONFIG.TOML ###############################################################
+### CONFIGURATION #############################################################
 
 There are only two required info for a default generation of a sequence: The 
-name of the interpolable (or path if part of a group) and the time of a 
+name of the interpolable (or Path if part of a group) and the Time of a 
 reference keyframe.
 
+[In CharaStudio]
 * Choose a keyframe where the interpolable is fully extended:
--- Dick pushed in the female.
--- Female pushed on dick (if she's the one moving).
--- It can be whatever is the apex/movement of your interpolable.
+  -- Dick pushed in the female.
+  -- Female pushed on dick (if she's the one moving).
+  -- It can be whatever is the apex/movement of your interpolable.
 * Copy the exact Time of that interpolable.
 * Copy the exact Name of that interpolable.
 
-Exemple: Your interpolable "Pos Waist" is part of a group(s), and the reference
-	 keyframe is at 00:02.454
- __________
-|  Main    |
-------------
- |   male   |      "00:02.454"
- ------------      ⇓
-  |Pos Waist|    ◆◆◆ ◆◆◆ ◆◆◆       ◆◆ ◆◆ ◆◆◆◆◆◆
-   ---------
+[In PLAP generator]
+The generator needs the Path and Time of the interpolable to use as reference.
 
-your config.toml would look like this:
+If the interpolable is not part of a group, you can just use its name.
 
-[[plap_group]]
-interpolable_path = "Main.male.Pos Waist"
-ref_keyframe_time = "00:02.454"
-### You can redefine the number of sound folders and their names ##
-plap_names = ["Plap1", "Plap2", "Plap3", "Plap4"]
+If it is part of a group, here is an exemple:
+
+    Your interpolable "Pos Waist" is part of a group(s), and the reference
+    keyframe is at 00:02.454
+    __________
+    |  Main    |
+    ------------
+    |   male   |      "00:02.454"
+    ------------      ⇓
+      |Pos Waist|    ◆◆◆ ◆◆◆ ◆◆◆       ◆◆ ◆◆ ◆◆◆◆◆◆
+      ---------
+
+    Path = Main.male.Pos Waist
+    Time = 00:02.454
 
  [-- Advanced use case ------------------------------------------------------]
 
-  You can check reference.toml for a full explanation of the parameters 
-  available to customize your sequence, such as:
+  You can click the ' ℹ ' icons for a full explanation of the parameters 
+  available to customize or apply corrections to your sequence:
   * A time range other then 00:00.0 -> End Of Scene.
   * A different sound pattern.
-  * Use multiple reference interpolable.
+  * Different sound folders.
   * Adjust the delay or the margin of error accepted to register a sound.
-  * ...
+  * (In development) Use multiple reference interpolable.
 
  [---------------------------------------------------------------------------]
 
 ### GENERATE THE PLAP FILES ###################################################
 
-Once your have exported your Single File and setup your config.toml, just take
-your Single File and drop it on generate_plaps. The program will generate a
-file for each name in "plap_names" of your config.toml file. They will be 
+Once your have exported your Single File and configured the generator, just
+take your Single File and drop it on generate_plaps. The program will generate
+a file for each name in "plap_names" of your config.toml file. They will be 
 created to whatever location your Single File was in.
 
 The output should be something like this:
@@ -94,24 +90,23 @@ Generated 'path\to\your\files\Timeline\Single Files\Plap3.xml'
 Generated 'path\to\your\files\Timeline\Single Files\Plap4.xml'
 Press Enter to exit...
 
-See TROUBLESHOOTING below if you have an issue.
+See ### TROUBLESHOOTING below if you have an issue.
 
 ### SETUP YOUR SCENE ##########################################################
 
 With the Plap.xml files generated, it's time to add SFX folders to your scene.
-You can just import into your scene Plap1234.png that is included with this 
-install and skip to the next phase: IMPORT TO TIMELINE.
+You can just import `/resources/Plap1234.png` that is included with this 
+install and skip to the next phase: ### IMPORT TO TIMELINE.
 
-*
- Create a folder for each name "plap_names" you defined in config.toml, they 
- need to have the exact same names.
-* 
- Fill each folders with 1 or more sound items of your choice, preferably low 
- latency single sound items like (S)Piston. There is a "delay" parameter that 
- you can use in the config if you want to play with sounds that are not instant.
-*
- Each folder is activated in sequence, which will produce whatever combination
- of sounds you put in there.
+* Create a folder for each name "plap_names" you defined in config.toml, they 
+  need to have the exact same names.
+
+* Fill each folders with 1 or more sound items of your choice, preferably low 
+  latency single sound items like (S)Piston. There is a "delay" parameter that 
+  you can use in the config if you want to play with sounds that are not instant.
+
+* Each folder is activated in sequence, which will produce whatever combination
+  of sounds you put in there.
 
 ### IMPORT TO TIMELINE ########################################################
 
@@ -122,22 +117,36 @@ Open Timeline -> Single Files, and for each of your sound folders:
 
 And voilà, a simple sequence of sound keyframes is added to your scene.
 
+### LIMITATIONS ###############################################################
 
+The reference can be lost if the subject of that interpolable:
+ (A) Increase/decrease his movement by a lot.
+ (B) Moves away from his point of origin.
+
+ Case (A) can usually be corrected in ### CONFIGURATION.
+ Case (B) is not yet supported with the app, only with ### TERMINAL.
 
 ### TROUBLESHOOTING ###########################################################
 
-NodeNotFoundError: Node not found: interpolableGroup[@name='Whatever']
+There are keyframes for only a part of the scene, then it stop :
+* Most likely the subject moved from his position to much, you can try 
+  decreasing Min Pull Out and/or Min Push In.
+
+There is a spam of sound keyframes at one point of the scene :
+* This can happen when the subject makes micro in-out moves near the contact
+  point, you can try increasing Min Pull Out and/or Min Push In.
+
+Missing node: `<interpolableGroup name='xxx'>`
 * The path to your interpolable contains a group that is not recognized make 
   sure it is the correct group.
 
-NodeNotFoundError: Node not found: interpolable[@alias='My Interpolable']
+Missing node: `<interpolable alias='GO Position (cf_t_hips(work)'>`
 * An interpolable with the given name was not found. Make sure it is correct 
   and that you renamed it in your scene before you exported it to Single File.
 
-NodeNotFoundError: The reference keyframe was not found
-* Make sure you gave the correct time for the reference keyfram
+Could not find the reference keyframe at ...
+* Make sure you gave the correct time for the reference keyframe.
 
-
-
-
-
+Could not find the ... file
+* PLAP generator cannot access `/configs` and `/resources`, or `config.toml` 
+  and `template.xml` that is supposed to be there.
