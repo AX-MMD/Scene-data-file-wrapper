@@ -1,3 +1,4 @@
 *.pyc
 /build
 bin/run_gui.exe
+src/bin/run_gui.exe
