@@ -38,11 +38,18 @@ class PlapUI(tk.Frame):
         self.create_widgets()
 
     def load_config(self, use_default=False):
-        if use_default:
-            with open(self.default_config_path, "r") as f:
+        try:
+            if use_default:
+                with open(self.default_config_path, "r") as f:
+                    return toml.load(f)
+            with open(self.config_path, "r") as f:
                 return toml.load(f)
-        with open(self.config_path, "r") as f:
-            return toml.load(f)
+        except FileNotFoundError:
+            CustomMessageBox(
+                self,
+                "Error",
+                f"Could not find the config file at {self.config_path}.",
+            )
 
     def update_widgets(self):
         self.ref_interpolable_widget.update()
