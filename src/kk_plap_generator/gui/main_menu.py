@@ -45,11 +45,11 @@ class PlapUI(tk.Frame):
             with open(self.config_path, "r") as f:
                 return toml.load(f)
         except FileNotFoundError:
-            CustomMessageBox(
+            self.wait_window(CustomMessageBox(
                 self,
                 "Error",
                 f"Could not find the config file at {self.config_path}.",
-            )
+            ))
 
     def update_widgets(self):
         self.ref_interpolable_widget.update()
