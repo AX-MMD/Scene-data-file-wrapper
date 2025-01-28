@@ -30,18 +30,28 @@ def keyframes_sets():
     r = {
         "simple": [
             et.Element("keyframe", time="0.0", valueX="0", valueY="0.2", valueZ="0"),
+            # reference
             et.Element(
-                "keyframe", time="0.2", valueX="0", valueY="0.1", valueZ="0"  # reference
-            ),  
+                "keyframe",
+                time="0.2",
+                valueX="0",
+                valueY="0.1",
+                valueZ="0",
+            ),
             et.Element("keyframe", time="0.4", valueX="0", valueY="0.2", valueZ="0"),
             et.Element("keyframe", time="0.6", valueX="0", valueY="0.1", valueZ="0"),
             et.Element("keyframe", time="0.8", valueX="0", valueY="0.2", valueZ="0"),
         ],
         "under_push": [
             et.Element("keyframe", time="0.0", valueX="0", valueY="0.2", valueZ="0"),
+            # reference
             et.Element(
-                "keyframe", time="0.2", valueX="0", valueY="0.1", valueZ="0"  # reference
-            ),  
+                "keyframe",
+                time="0.2",
+                valueX="0",
+                valueY="0.1",
+                valueZ="0",
+            ),
             et.Element("keyframe", time="0.4", valueX="0", valueY="0.2", valueZ="0"),
             et.Element("keyframe", time="0.6", valueX="0", valueY="0.12", valueZ="0"),
             et.Element("keyframe", time="0.8", valueX="0", valueY="0.2", valueZ="0"),

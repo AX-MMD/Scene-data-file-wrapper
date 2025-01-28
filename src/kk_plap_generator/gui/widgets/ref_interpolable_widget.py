@@ -56,7 +56,7 @@ class RefInterpolableWidget:
         info_message = """
 ### INTRO #####################################################################
 
-PLAP generator uses a Timeline interpolable as reference to generate a sequence to use with sound folders. It is meant to sync with a simple movement like forward-backward, up-down, etc. 
+PLAP generator uses a Timeline interpolable as reference to generate a sequence to use with sound folders. It is meant to sync with a simple movement like forward-backward, up-down, etc.
 
 The process is as follows:
 - Export the Timeline Single File of your reference
