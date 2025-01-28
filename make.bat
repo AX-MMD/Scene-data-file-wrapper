@@ -7,6 +7,7 @@ IF /I "%1"==".DEFAULT_GOAL " GOTO .DEFAULT_GOAL
 IF /I "%1"=="format" GOTO format
 IF /I "%1"=="lint" GOTO lint
 IF /I "%1"=="test" GOTO test
+IF /I "%1"=="bin" GOTO bin
 GOTO error
 
 :.DEFAULT_GOAL 
@@ -27,6 +28,10 @@ GOTO error
 
 :test
 	pytest %project_path%
+	GOTO :EOF
+
+:bin
+	pyinstaller run_gui.spec
 	GOTO :EOF
 
 :error

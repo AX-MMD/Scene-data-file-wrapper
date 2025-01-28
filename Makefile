@@ -16,6 +16,11 @@ lint:
 .PHONY: test
 test:
 	pytest $(project_path)
+
+.PHONY: bin
+test:
+	pyinstaller run_gui.spec 
+
 .PHONY: all
 
 all: lint test
