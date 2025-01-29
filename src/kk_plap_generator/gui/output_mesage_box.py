@@ -28,6 +28,7 @@ class CustomMessageBox(tk.Toplevel):
 
         # Center the dialog on the parent window
         self.update_idletasks()
+
         parent_x = parent.winfo_rootx()
         parent_y = parent.winfo_rooty()
         parent_width = parent.winfo_width()
@@ -36,4 +37,4 @@ class CustomMessageBox(tk.Toplevel):
         self_height = self.winfo_height()
         x = parent_x + (parent_width // 2) - (self_width // 2)
         y = parent_y + (parent_height // 2) - (self_height // 2)
-        self.geometry(f"+{x}+{y}")
+        self.geometry(f"{self_width}x{self_height}+{x}+{y}")
