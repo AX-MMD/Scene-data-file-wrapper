@@ -1,28 +1,34 @@
 README = """
 ### INTRO #####################################################################
+___
+Author: AX-MMD    
+Docs: https://github.com/AX-MMD/kk-plap-generator/tree/main?tab=readme-ov-file#intro
 
-PLAP generator uses a Timeline interpolable as reference to generate a sequence to use with sound folders. It is meant to sync with a simple movement like forward-backward, up-down, etc.
+PLAP generator uses a Timeline interpolable as reference to generate a sequence to use with sound folders. It is meant to sync with a simple movement like forward-backward, up-down, etc. 
 
 The process is as follows:
 - Export the Timeline Single File of your reference
 - Configure PLAP generator
 - Generate your PLAP files
-- Setup your scene (import `/resources/Plap1234.png` or make your own folders)
-- Import PLAP files to Timeline
+- Setup your scene (import `/resources/Plap1234.png` or make your own sound folders)
+- Import the generated PLAP files to Timeline
 
 ### EXPORT TIMELINE SINGLE FILE ###############################################
+___
+> In CharaStudio
+* Choose an interpolable like "GO Pos Waist", Hips, Dick, etc. Rotation is fine too. 
+* Rename it with an alias, can also just Rename -> ctrl+X -> ctrl+V. 
+* Make sure the owner of that interpolable is selected (green) in your Workspace.
+* Timeline -> Single Files -> Save.
 
-[In CharaStudio]
-* Choose an interpolable like "GO Pos Waist", Hips, Dick. Rotation is fine too.
-* Rename it with an alias, can also just Rename -> ctrl+X -> ctrl+V.
-* Click the owner of that interpolable in your Workspace then
-  Timeline -> Single Files -> Save.
+> In PLAP generator
+* Drop the exported file into the file drop zone or use the `Select File` button.
 
 ### CONFIGURATION #############################################################
-
+___
 There are only two required info for a default generation of a sequence: The name of the interpolable (or Path if part of a group) and the Time of a reference keyframe.
 
-[In CharaStudio]
+> In CharaStudio
 * Choose a keyframe where the interpolable is fully extended:
   -- Dick pushed in the female.
   -- Female pushed on dick (if she's the one moving).
@@ -30,12 +36,10 @@ There are only two required info for a default generation of a sequence: The nam
 * Copy the exact Time of that interpolable.
 * Copy the exact Name of that interpolable.
 
-[In PLAP generator]
-The generator needs the Path and Time of the interpolable to use as reference.
+> In PLAP generator
+* The generator needs the Path and Time of the interpolable to use as reference.
 
-If the interpolable is not part of a group, you can just use its name.
-
-If it is part of a group, here is an exemple:
+If the interpolable is part of a group, here is an exemple:
 
     Your interpolable "Pos Waist" is part of a group(s), and the reference keyframe is at 00:02.454
     __________
@@ -49,20 +53,22 @@ If it is part of a group, here is an exemple:
     Path = Main.male.Pos Waist
     Time = 00:02.454
 
- [-- Advanced use case ------------------------------------------------------]
+If the interpolable is not part of a group, you can just use its name (`Pos Waist` in the exemple above). 
+ 
+[-- Advanced use case ------------------------------------------------------]
 
-  You can click the ' ℹ ' icons for a full explanation of the parameters available to customize or apply corrections to your sequence:
-  * A time range other then 00:00.0 -> End Of Scene.
-  * A different sound pattern.
-  * Different sound folders.
-  * Adjust the delay or the margin of error accepted to register a sound.
-  * (In development) Use multiple reference interpolable.
+You can click the ` ℹ ` icons for a full explanation of the parameters available to customize or apply corrections to your sequence:
+* A time range other then 00:00.0 -> End Of Scene.
+* A different sound pattern.
+* A different number of sound folders and names.
+* Adjust the delay or the margin of error accepted to register a sound.
+* (In development) Use multiple reference interpolable.
 
- [---------------------------------------------------------------------------]
+[---------------------------------------------------------------------------]
 
 ### GENERATE THE PLAP FILES ###################################################
-
-Once your have exported your Single File and configured the generator, just take your Single File and drop it on generate_plaps. The program will generate a file for each name in "plap_names" of your config.toml file. They will be created to whatever location your Single File was in.
+___
+Once your have exported your Single File and configured the generator, press the `▶` Play button. The program will generate a file for each name in `Sound Folders`. They will be created to whatever location your exported Single File was in.
 
 The output should be something like this:
 
@@ -80,6 +86,8 @@ The output should be something like this:
 See TROUBLESHOOTING below if you have an issue.
 
 ### SETUP YOUR SCENE ##########################################################
+___
+> In CharaStudio
 
 With the Plap.xml files generated, it's time to add SFX folders to your scene.
 You can just import `/resources/Plap1234.png` that is included with this install and skip to the next phase: IMPORT TO TIMELINE.
@@ -91,25 +99,28 @@ You can just import `/resources/Plap1234.png` that is included with this install
 * Each folder is activated in sequence, which will produce whatever combination of sounds you put in there.
 
 ### IMPORT TO TIMELINE ########################################################
+___
+> In CharaStudio
 
-Open Timeline -> Single Files, and for each of your sound folders:
+(If you already have interpolables in Timeline for your sound folders, delete them)
+
+For each of your sound folders in your workspace:
 * Click the folder to highlight it.
-* Click on the corresponding name in the Single Files.
-* Click Load
+* In Timeline -> Single Files, load the corresponding name.
 
 And voilà, a simple sequence of sound keyframes is added to your scene.
 
 ### LIMITATIONS ###############################################################
-
+___
 The reference can be lost if the subject of that interpolable:
- (A) Increase/decrease his movement by a lot.
- (B) Moves away from his point of origin.
+ * (A) Increase/decrease his movement by a lot.
+ * (B) Moves away from his point of origin.
 
  Case (A) can usually be corrected in CONFIGURATION.
  Case (B) is not yet supported with the app, only with TERMINAL.
 
 ### TROUBLESHOOTING ###########################################################
-
+___
 There are keyframes for only a part of the scene, then it stop :
 * Most likely the subject moved from his position to much, you can try decreasing Min Pull Out and/or Min Push In.
 
@@ -117,10 +128,12 @@ There is a spam of sound keyframes at one point of the scene :
 * This can happen when the subject makes micro in-out moves near the contact point, you can try increasing Min Pull Out and/or Min Push In.
 
 Missing node: `<interpolableGroup name='xxx'>`
-* The path to your interpolable contains a group that is not recognized make sure it is the correct group.
+* The path you gave for the reference interpolable contains a parent group that is not recognized, make sure the path is correct.
+* Modded CharaStudio auto-translates, look at your Timeline and press Alt+T to see the real names of the groups and interpolables.
 
-Missing node: `<interpolable alias='GO Position (cf_t_hips(work)'>`
+Missing node: `<interpolable alias='xxx'>`
 * An interpolable with the given name was not found. Make sure it is correct and that you renamed it in your scene before you exported it to Single File.
+* Modded CharaStudio auto-translates, look at your Timeline and press Alt+T to see the real names of the groups and interpolables.
 
 Could not find the reference keyframe at ...
 * Make sure you gave the correct time for the reference keyframe.
