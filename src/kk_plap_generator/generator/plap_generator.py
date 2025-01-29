@@ -368,11 +368,13 @@ class NodeNotFoundError(Exception):
         tag: Optional[str] = None,
         value: Optional[str] = None,
         *args,
+        path: Optional[str] = None,
         xml_path: Optional[str] = None,
     ):
         self.node_name = node_name
         self.tag = tag
         self.value = value
+        self.path = path
         self.xml_path = xml_path
         self.message = f"Node not found: {self.get_node_string()}"
         super().__init__(self.message, *args)
@@ -391,10 +393,12 @@ class NodeNotFoundError(Exception):
 def find_interpolable(tree: et.ElementTree, target: str):
     node = tree.getroot()
     tag, value, child = convert_string_to_nested_list(target)
+    path = []
     while child is not None:
+        path.append(value)
         node = node.find(f"""interpolableGroup[@{tag}='{value}']""")
         if node is None:
-            raise NodeNotFoundError("interpolableGroup", tag, value)
+            raise NodeNotFoundError("interpolableGroup", tag, value, path=".".join(path))
         tag, value, child = child
 
     node = node.find(f"""interpolable[@{tag}='{value}']""")

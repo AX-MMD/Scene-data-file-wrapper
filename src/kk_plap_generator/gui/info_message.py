@@ -5,7 +5,7 @@ from kk_plap_generator.gui.output_mesage_box import CustomMessageBox
 
 
 class InfoMessageFrame:
-    def __init__(self, masterframe, message, text="ℹ", fg="black"):
+    def __init__(self, masterframe, message, text="ℹ", fg="blue"):
         self.message = message
         self.top_right_frame = tk.Frame(masterframe)
         self.top_right_frame.pack(side=tk.RIGHT)

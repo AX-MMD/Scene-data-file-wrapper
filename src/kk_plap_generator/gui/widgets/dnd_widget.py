@@ -5,14 +5,15 @@ from tkinter import filedialog
 
 import tkinterdnd2
 
+from kk_plap_generator.gui.widgets.base import PlapWidget
+
 if typing.TYPE_CHECKING:
     from kk_plap_generator.gui.main_menu import PlapUI
 
 
-class DnDWidget:
+class DnDWidget(PlapWidget):
     def __init__(self, app: "PlapUI", masterframe):
-        self.app = app
-        self.masterframe = masterframe
+        super().__init__(app, masterframe)
         self.single_file: typing.Optional[str] = None
 
         self.drag_drop_frame = tk.Frame(masterframe, bd=2, relief="solid")

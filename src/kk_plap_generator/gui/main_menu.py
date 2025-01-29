@@ -1,6 +1,8 @@
+import os
 import tkinter as tk
 import traceback
 from tkinter import font, messagebox
+from typing import List, Optional
 
 import tkinterdnd2
 import toml
@@ -9,6 +11,7 @@ from kk_plap_generator import settings
 from kk_plap_generator.generator.plap_generator import NodeNotFoundError, PlapGenerator
 from kk_plap_generator.generator.utils import generate_plaps
 from kk_plap_generator.gui.output_mesage_box import CustomMessageBox
+from kk_plap_generator.gui.validators import ValidationError
 from kk_plap_generator.gui.widgets import (
     DnDWidget,
     RefInterpolableWidget,
@@ -17,12 +20,15 @@ from kk_plap_generator.gui.widgets import (
     SoundPatternWidget,
     TimeRangesWidget,
 )
+from kk_plap_generator.gui.widgets.base import PlapWidget
+from kk_plap_generator.gui.widgets.config_selector_widget import ConfigSelectorWidget
+from kk_plap_generator.utils import PlapGroupConfig
 
 
 class PlapUI(tk.Frame):
     def __init__(
         self,
-        master=None,
+        master: tkinterdnd2.Tk,
         config_path=settings.CONFIG_FILE,
         default_config_path=settings.DEFAULT_CONFIG_FILE,
     ):
@@ -30,20 +36,39 @@ class PlapUI(tk.Frame):
         self.master = master
         self.config_path: str = config_path
         self.default_config_path = default_config_path
-        self.plap_config = self.load_config()
-        self.store = self.plap_config.get("plap_group")[0]
         self.symbol_font = font.Font(family="Arial", size=13)
 
+        self.current_page = 0
+        # First boot
+        if not os.path.isfile(self.config_path):
+            self.load_config(self.default_config_path)
+        else:
+            self.load_config()
+
         self.pack(fill=tk.BOTH, expand=True)
+        self.widgets: List[PlapWidget] = []
         self.create_widgets()
 
-    def load_config(self, use_default=False):
+        self.master.protocol("WM_DELETE_WINDOW", self.on_program_close)  # type: ignore
+
+    @property
+    def store(self) -> PlapGroupConfig:
+        return self._stores[self.current_page]
+
+    @store.setter
+    def store(self, value: PlapGroupConfig):
+        self._stores[self.current_page] = value
+
+    @property
+    def plap_config(self) -> List[PlapGroupConfig]:
+        return self._stores
+
+    def load_config(self, path: Optional[str] = None):
         try:
-            if use_default:
-                with open(self.default_config_path, "r") as f:
-                    return toml.load(f)
-            with open(self.config_path, "r") as f:
-                return toml.load(f)
+            path = path or self.config_path
+            with open(path, "r", encoding="UTF-8") as f:
+                self._stores: List[PlapGroupConfig] = toml.load(f)["plap_group"]
+            self.current_page = 0
         except FileNotFoundError:
             self.wait_window(
                 CustomMessageBox(
@@ -52,13 +77,38 @@ class PlapUI(tk.Frame):
                     f"Could not find the config file at {self.config_path}.",
                 )
             )
+        except toml.TomlDecodeError:
+            self.wait_window(
+                CustomMessageBox(
+                    self,
+                    "Error",
+                    f"Could not read the config file at {self.config_path}.",
+                )
+            )
+        except KeyError:
+            self.wait_window(
+                CustomMessageBox(
+                    self,
+                    "Error",
+                    f"Could not find 'plap_group' in the config file at {self.config_path}.",
+                )
+            )
+
+    def save_config(self):
+        self.widgets_save()
+        with open(self.config_path, "w", encoding="utf-8") as f:
+            toml.dump({"plap_group": self._stores}, f)
+
+    def on_program_close(self):
+        try:
+            self.widgets_save()
+            self.save_config()
+        finally:
+            self.master.destroy()
 
     def update_widgets(self):
-        self.ref_interpolable_widget.update()
-        self.seq_adjustment_widget.update()
-        self.sound_folders_widget.update()
-        self.sound_pattern_widget.update()
-        self.time_ranges_widget.update()
+        for widget in self.widgets:
+            widget.update()
 
     def create_widgets(self):
         # Create the main 2x3 grid
@@ -113,15 +163,12 @@ class PlapUI(tk.Frame):
         self.bottom_left_frame.grid_columnconfigure(1, weight=1)
         self.bottom_left_frame.grid_columnconfigure(2, weight=1)
 
-        # Reset Button
-        self.reset_button = tk.Button(
-            self.bottom_left_frame, text="Reset ↺", command=self.reset_button_action
-        )
-        self.reset_button.grid(row=0, column=0, sticky="nsew")
-
+        # Load Button
+        self.config_loader_widget = ConfigSelectorWidget(self, self.bottom_left_frame)
+        self.widgets.append(self.config_loader_widget)
         # Generate Button
         self.generate_button = tk.Button(
-            self.bottom_left_frame, text="▶", command=self.generate_plaps
+            self.bottom_left_frame, text="▶", fg="green", command=self.generate_plaps
         )
         self.generate_button.grid(row=0, column=1, sticky="nsew")
 
@@ -131,36 +178,20 @@ class PlapUI(tk.Frame):
         )
         self.save_button.grid(row=0, column=2, sticky="nsew")
 
-    def reset_button_action(self):
-        self.plap_config = self.load_config(use_default=True)
-        loaded_store = self.plap_config.get("plap_group")[0]
-        loaded_store.update(
-            interpolable_path=self.store["interpolable_path"],
-            ref_keyframe_time=self.store["ref_keyframe_time"],
-        )
-        self.store = loaded_store
-        self.update_widgets()
-        self.dnd_widget.reset_single_file()
-
     def save_button_action(self):
         self.save_config()
         self.load_config()
         self.update_widgets()
 
-    def save_config(self):
-        errors = []
-        errors.extend(self.ref_interpolable_widget.save())
-        errors.extend(self.seq_adjustment_widget.save())
-        errors.extend(self.sound_pattern_widget.save())
-
+    def widgets_save(self):
+        errors: List[str] = []
+        for widget in self.widgets:
+            try:
+                widget.save()
+            except ValidationError as e:
+                errors.extend(e.errors)
         if errors:
-            messagebox.showerror("Error", "\n".join(errors))
-            return
-
-        self.plap_config["plap_group"] = [self.store]
-
-        with open(self.config_path, "w") as f:
-            toml.dump(self.plap_config, f)
+            raise ValidationError(errors=errors)
 
     def generate_plaps(self):
         if self.dnd_widget.get_single_file() is None:
@@ -169,7 +200,7 @@ class PlapUI(tk.Frame):
             try:
                 self.save_config()
                 output = generate_plaps(
-                    self.dnd_widget.get_single_file(), self.plap_config["plap_group"]
+                    self.dnd_widget.get_single_file(), self.plap_config
                 )
                 CustomMessageBox(
                     self, "Success ✔", "::: Success :::\n\n" + "\n".join(output)
@@ -199,6 +230,8 @@ class PlapUI(tk.Frame):
                     "Failled ✖",
                     f"::: Reference not found :::\n\n> Could not find the reference keyframe at {e.time}",
                 )
+            except ValidationError as e:
+                messagebox.showerror("ValidationError", e.get_err_str())
             except Exception:
                 CustomMessageBox(self, "Failled ✖", traceback.format_exc())
 

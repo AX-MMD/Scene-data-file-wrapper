@@ -1,17 +1,20 @@
 import tkinter as tk
 import typing
+from tkinter import messagebox
 
+from kk_plap_generator.gui import info_text
 from kk_plap_generator.gui.info_message import InfoMessageFrame
+from kk_plap_generator.gui.main_menu import ValidationError
 from kk_plap_generator.gui.validators import validate_offset
+from kk_plap_generator.gui.widgets.base import PlapWidget
 
 if typing.TYPE_CHECKING:
     from kk_plap_generator.gui.main_menu import PlapUI
 
 
-class SeqAdjustmentWidget:
+class SeqAdjustmentWidget(PlapWidget):
     def __init__(self, app: "PlapUI", masterframe):
-        self.app = app
-        self.masterframe = masterframe
+        super().__init__(app, masterframe)
 
         self.offset_frame = tk.Frame(masterframe, bd=2, relief="solid")
         self.offset_frame.grid(row=0, column=0, sticky="nsew")
@@ -28,27 +31,11 @@ class SeqAdjustmentWidget:
         self.offset_label = tk.Label(self.top_left_frame, text="Sound Offset")
         self.offset_label.pack()
         self.offset_entry = tk.Entry(self.offset_frame, justify="center")
-        self.offset_entry.insert(0, self.app.store["offset"])
+        self.offset_entry.insert(0, str(self.app.store["offset"]))
+        self.offset_entry.bind("<FocusOut>", self.on_focus_out)
         self.offset_entry.pack()
 
-        info_message = """
-[---------------------------- Adjustments ---------------------------]
-
-These settings are only used for corrections, only change them if there is to much plaps, not enough plaps, or the plaps are not synced with the reference.
-
-::: Offset :::
-Offset in seconds, in case you don't want the sfx to be timed exactly with the reference keyframes. Can be positive or negative.
-
-::: Minimum Pull Out % :::
-The generator estimates the distance traveled by the subject for each plap, here you can set what (%) of that distance the subject needs to pull away from the contact point before re-enabling plaps.
-
-This is to prevents spam if the subject is making micro in-out moves when fully inserted.
-
-::: Minimum Push In % :::
-The generator estimates the distance traveled by the subject for each plap, here you can set what (%) of that distance the subject needs to push toward the contact point for a plap to register.
-
-This is in case the contact point gets closer and the subject does not need to thrust as far.
-        """
+        info_message = info_text.CORRECTIONS
         self.top_right_frame = InfoMessageFrame(self.top_frame, info_message)
 
         # Min Pull Out
@@ -61,6 +48,7 @@ This is in case the contact point gets closer and the subject does not need to t
             self.min_pull_out_frame, from_=0, to=100, orient=tk.HORIZONTAL, resolution=0.5
         )
         self.min_pull_out_slider.set(self.app.store["min_pull_out"] * 100)
+        self.min_pull_out_slider.bind("<ButtonRelease-1>", self.on_pull_slider_release)
 
         # Left button
         self.min_pull_out_left_button = tk.Button(
@@ -92,6 +80,7 @@ This is in case the contact point gets closer and the subject does not need to t
             self.min_push_in_frame, from_=0, to=100, orient=tk.HORIZONTAL, resolution=0.5
         )
         self.min_push_in_slider.set(self.app.store["min_push_in"] * 100)
+        self.min_pull_out_slider.bind("<ButtonRelease-1>", self.on_push_slider_release)
 
         # Left button
         self.min_push_in_left_button = tk.Button(
@@ -113,15 +102,27 @@ This is in case the contact point gets closer and the subject does not need to t
         self.min_push_in_slider.pack(side=tk.LEFT, fill=tk.X, expand=True)
         self.min_push_in_right_button.pack(side=tk.LEFT)
 
+    def on_pull_slider_release(self, event):
+        self.app.store["min_pull_out"] = self.min_pull_out_slider.get() / 100
+
+    def on_push_slider_release(self, event):
+        self.app.store["min_push_in"] = self.min_push_in_slider.get() / 100
+
     def adjust_slider(self, slider, increment):
         current_value = slider.get()
         new_value = current_value + increment
         if 0 <= new_value <= 100:
             slider.set(new_value)
 
+    def on_focus_out(self, event):
+        try:
+            self.save()
+        except ValidationError as e:
+            messagebox.showerror("ValidationError", e.get_err_str())
+
     def update(self):
         self.offset_entry.delete(0, tk.END)
-        self.offset_entry.insert(0, self.app.store["offset"])
+        self.offset_entry.insert(0, str(self.app.store["offset"]))
 
         self.min_pull_out_slider.set(self.app.store["min_pull_out"] * 100)
         self.min_push_in_slider.set(self.app.store["min_push_in"] * 100)
@@ -132,11 +133,14 @@ This is in case the contact point gets closer and the subject does not need to t
         if not validate_offset(offset):
             errors.append("Invalid offset format. Expected a decimal compatible value")
             self.offset_entry.delete(0, tk.END)
-            self.offset_entry.insert(0, self.app.store.get("offset", ""))
+            self.offset_entry.insert(0, str(self.app.store["offset"]))
         else:
             self.app.store["offset"] = float(offset)
 
-        self.app.store["min_pull_out"] = self.min_pull_out_slider.get() / 100
+        if errors:
+            raise ValidationError(errors=errors)
+
+        self.app.store["min_push_in"] = self.min_push_in_slider.get() / 100
         self.app.store["min_push_in"] = self.min_push_in_slider.get() / 100
 
-        return errors
+        return super().save()

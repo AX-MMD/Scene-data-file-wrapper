@@ -2,16 +2,17 @@ import tkinter as tk
 import typing
 
 from kk_plap_generator.generator.plap_generator import PlapGenerator
+from kk_plap_generator.gui import info_text
 from kk_plap_generator.gui.info_message import InfoMessageFrame
+from kk_plap_generator.gui.widgets.base import PlapWidget
 
 if typing.TYPE_CHECKING:
     from kk_plap_generator.gui.main_menu import PlapUI
 
 
-class SoundPatternWidget:
+class SoundPatternWidget(PlapWidget):
     def __init__(self, app: "PlapUI", masterframe):
-        self.app = app
-        self.masterframe = masterframe
+        super().__init__(app, masterframe)
 
         self.pattern_string_frame = tk.Frame(masterframe, bd=2, relief="solid")
         self.pattern_string_frame.grid(row=1, column=0, sticky="nsew")
@@ -28,23 +29,7 @@ class SoundPatternWidget:
         self.pattern_string_label.pack()
 
         # The pattern looks bad here but it's good on the display
-        info_message = """
-[-------------------------- Customization ---------------------------]
-
-::: Sound Pattern :::
-PLAP generator will create a sequence of keyframes for each of your sound folders.
-The sound pattern is what determines the order of activation of your folder.
-For example, if you have 4 folders named Plap1-4, and your pattern is "W", the generated keyframes for Timeline will look like this:
-_______
-|Plap1|  ◆               ◆                 ◆
-|Plap2|    ◆     ◆     ◆  ◆      ◆     ◆  ◆  and so on...
-|Plap3|      ◆  ◆ ◆ ◆      ◆  ◆  ◆  ◆
-|Plap4|        ◆    ◆         ◆      ◆
-=====
-
-You combine multiple letters to create a more complex pattern.
-
-        """
+        info_message = info_text.SOUND_PATTERN
         self.top_right_frame = InfoMessageFrame(self.top_frame, info_message)
 
         # Pattern value display
@@ -87,8 +72,6 @@ You combine multiple letters to create a more complex pattern.
         self.pattern_string_value.config(text=self.app.store["pattern_string"])
 
     def save(self):
-        errors: typing.List[str] = []
         if not self.app.store.get("pattern_string"):
             self.app.store["pattern_string"] = PlapGenerator.VALID_PATTERN_CHARS[0]
-
-        return errors
+        return super().save()

@@ -3,11 +3,10 @@ import typing
 import xml.etree.ElementTree as et
 
 from kk_plap_generator.generator.plap_generator import PlapGenerator
+from kk_plap_generator.utils import PlapGroupConfig
 
 
-def generate_plaps(
-    ref_single_file_path: str, groups: typing.List[typing.Dict[str, typing.Any]]
-):
+def generate_plaps(ref_single_file_path: str, groups: typing.List[PlapGroupConfig]):
     xml_tree = et.ElementTree()
     xml_tree.parse(ref_single_file_path)
     plaps: typing.Dict[str, et.Element] = {}

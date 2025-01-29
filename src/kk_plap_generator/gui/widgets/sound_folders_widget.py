@@ -2,17 +2,17 @@ import tkinter as tk
 import typing
 from tkinter import simpledialog
 
+from kk_plap_generator.gui import info_text
 from kk_plap_generator.gui.info_message import InfoMessageFrame
+from kk_plap_generator.gui.widgets.base import PlapWidget
 
 if typing.TYPE_CHECKING:
     from kk_plap_generator.gui.main_menu import PlapUI
 
 
-class SoundFoldersWidget:
+class SoundFoldersWidget(PlapWidget):
     def __init__(self, app: "PlapUI", masterframe):
-        self.app = app
-        self.masterframe = masterframe
-        self.app.store = app.store
+        super().__init__(app, masterframe)
 
         self.sound_folders_frame = tk.Frame(masterframe, bd=2, relief="solid")
         self.sound_folders_frame.grid(row=0, column=0, sticky="nsew")
@@ -29,12 +29,7 @@ class SoundFoldersWidget:
         self.sound_folders_label = tk.Label(self.top_left_frame, text="Sound Folders")
         self.sound_folders_label.pack()
 
-        info_message = """
-[--------------------------- Customization --------------------------]
-
-::: Sound Folders :::
-Here you tell the generator what are the names of your sound folders in Charastudio (folderscontaining your sound items).
-        """
+        info_message = info_text.SOUND_FOLDERS
         self.top_right_frame = InfoMessageFrame(self.top_frame, info_message)
 
         self.sound_folders_listbox = tk.Listbox(self.sound_folders_frame)

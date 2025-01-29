@@ -12,3 +12,13 @@ def validate_offset(value):
         return True
     except ValueError:
         return False
+
+
+class ValidationError(Exception):
+    def __init__(self, message="", *args, errors=None):
+        self.errors = errors or []
+        self.message = message or ("Validation Error:" + "\n" + "\n".join(self.errors))
+        super().__init__(self.message, *args)
+
+    def get_err_str(self):
+        return "\n".join(self.errors)

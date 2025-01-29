@@ -2,17 +2,18 @@ import tkinter as tk
 import typing
 from tkinter import simpledialog
 
+from kk_plap_generator.gui import info_text
 from kk_plap_generator.gui.info_message import InfoMessageFrame
 from kk_plap_generator.gui.validators import validate_time
+from kk_plap_generator.gui.widgets.base import PlapWidget
 
 if typing.TYPE_CHECKING:
     from kk_plap_generator.gui.main_menu import PlapUI
 
 
-class TimeRangesWidget:
+class TimeRangesWidget(PlapWidget):
     def __init__(self, app: "PlapUI", masterframe):
-        self.app = app
-        self.masterframe = masterframe
+        super().__init__(app, masterframe)
 
         self.time_ranges_frame = tk.Frame(masterframe, bd=2, relief="solid")
         self.time_ranges_frame.grid(row=1, column=0, sticky="nsew")
@@ -29,20 +30,8 @@ class TimeRangesWidget:
         self.time_ranges_label = tk.Label(self.top_left_frame, text="Time Ranges")
         self.time_ranges_label.pack()
 
-        info_text = """
-[---------------------------- Adjustments ---------------------------]
-
-::: Time Ranges :::
-By default the generator will try to make keyframes starting from 00:00.00.
-You can have a different start point, end point or multiple ranges.
-
-For exemple, if you give the ranges 00:01.5, 00:05.0 and 00:10.5, 00:15.0 the generator will try to make keyframes only at those points.
-
-! important !
-If you give a custom range, you must put both a Start and Stop point.
-        """
-
-        self.top_right_frame = InfoMessageFrame(self.top_frame, info_text)
+        info_message = info_text.TIME_RANGES
+        self.top_right_frame = InfoMessageFrame(self.top_frame, info_message)
 
         self.time_ranges_listbox = tk.Listbox(self.time_ranges_frame)
         self.time_ranges_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
@@ -77,7 +66,7 @@ If you give a custom range, you must put both a Start and Stop point.
         if selected_index:
             selected_time_range = self.time_ranges_listbox.get(selected_index)
             start, stop = selected_time_range.split(" - ")
-            self.app.store["time_ranges"].remove([start, stop])
+            self.app.store["time_ranges"].remove((start, stop))
             self.update()
 
     def add_time_range(self):
@@ -87,7 +76,7 @@ If you give a custom range, you must put both a Start and Stop point.
             start_time = result["start_time"]
             stop_time = result["stop_time"]
             if validate_time(start_time) and validate_time(stop_time):
-                self.app.store["time_ranges"].append([start_time, stop_time])
+                self.app.store["time_ranges"].append((start_time, stop_time))
                 self.update()
             else:
                 tk.messagebox.showerror(
