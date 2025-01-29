@@ -20,6 +20,7 @@ class ConfigSelectorWidget(PlapWidget):
     def open_config_dialog(self):
         self.dialog = tk.Toplevel(self.masterframe)
         self.dialog.title("Select Config File")
+        self.dialog.geometry("300x200")
 
         self.dialog.grid_rowconfigure(0, weight=1)
         self.dialog.grid_columnconfigure(0, weight=1)
@@ -54,6 +55,9 @@ class ConfigSelectorWidget(PlapWidget):
         )
         self.cancel_button.grid(row=0, column=1, padx=5)
 
+        self.dialog.lift()  # Bring the dialog to the front
+        self.dialog.grab_set()  # Make the dialog modal
+        self.dialog.update_idletasks()
         self.center_dialog()
 
     def center_dialog(self):
