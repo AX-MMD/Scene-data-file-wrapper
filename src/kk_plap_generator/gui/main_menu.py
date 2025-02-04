@@ -1,5 +1,6 @@
 import os
 import tkinter as tk
+from tkinter import filedialog
 import traceback
 from tkinter import font, messagebox
 from typing import List, Optional
@@ -9,20 +10,20 @@ import toml
 
 from kk_plap_generator import settings
 from kk_plap_generator.generator.plap_generator import NodeNotFoundError, PlapGenerator
-from kk_plap_generator.generator.utils import generate_plaps
 from kk_plap_generator.gui.output_mesage_box import CustomMessageBox
 from kk_plap_generator.gui.validators import ValidationError
 from kk_plap_generator.gui.widgets import (
     DnDWidget,
     RefInterpolableWidget,
     SeqAdjustmentWidget,
-    SoundFoldersWidget,
+    SoundComponentsWidget,
     SoundPatternWidget,
     TimeRangesWidget,
 )
 from kk_plap_generator.gui.widgets.base import PlapWidget
 from kk_plap_generator.gui.widgets.config_selector_widget import ConfigSelectorWidget
-from kk_plap_generator.utils import PlapGroupConfig
+from kk_plap_generator.models import PlapGroupConfig
+from kk_plap_generator.utils import generate_plaps
 
 
 class PlapUI(tk.Frame):
@@ -74,7 +75,7 @@ class PlapUI(tk.Frame):
                 CustomMessageBox(
                     self,
                     "Error",
-                    f"Could not find the config file at {self.config_path}.",
+                    f"Could not find the config file at {path}.",
                 )
             )
         except toml.TomlDecodeError:
@@ -82,7 +83,7 @@ class PlapUI(tk.Frame):
                 CustomMessageBox(
                     self,
                     "Error",
-                    f"Could not read the config file at {self.config_path}.",
+                    f"Could not read the config file at {path}.",
                 )
             )
         except KeyError:
@@ -90,13 +91,13 @@ class PlapUI(tk.Frame):
                 CustomMessageBox(
                     self,
                     "Error",
-                    f"Could not find 'plap_group' in the config file at {self.config_path}.",
+                    f"Could not find 'plap_group' in the config file at {path}.",
                 )
             )
 
-    def save_config(self):
+    def save_config(self, path: Optional[str] = None):
         self.widgets_save()
-        with open(self.config_path, "w", encoding="utf-8") as f:
+        with open(path or self.config_path, "w", encoding="utf-8") as f:
             toml.dump({"plap_group": self._stores}, f)
 
     def on_program_close(self):
@@ -121,8 +122,8 @@ class PlapUI(tk.Frame):
         # Left frame with 2x1 grid
         self.left_frame = tk.Frame(self)
         self.left_frame.grid(row=0, column=0, sticky="nsew")
-        self.left_frame.grid_rowconfigure(0, weight=2)
-        self.left_frame.grid_rowconfigure(1, weight=1)
+        self.left_frame.grid_rowconfigure(0, weight=90)
+        self.left_frame.grid_rowconfigure(1, weight=10)
         self.left_frame.grid_columnconfigure(0, weight=1)
 
         # Middle frame with 2x1 grid
@@ -145,8 +146,8 @@ class PlapUI(tk.Frame):
         # Reference Interpolable
         self.ref_interpolable_widget = RefInterpolableWidget(self, self.left_frame)
 
-        # Sound Folder Names
-        self.sound_folders_widget = SoundFoldersWidget(self, self.middle_frame)
+        # Sound Component Names
+        self.sound_components_widget = SoundComponentsWidget(self, self.middle_frame)
 
         # Sound Pattern
         self.sound_pattern_widget = SoundPatternWidget(self, self.middle_frame)
@@ -165,7 +166,7 @@ class PlapUI(tk.Frame):
 
         # Load Button
         self.config_loader_widget = ConfigSelectorWidget(self, self.bottom_left_frame)
-        self.widgets.append(self.config_loader_widget)
+        
         # Generate Button
         self.generate_button = tk.Button(
             self.bottom_left_frame, text="▶", fg="green", command=self.generate_plaps
@@ -174,13 +175,21 @@ class PlapUI(tk.Frame):
 
         # Save Button
         self.save_button = tk.Button(
-            self.bottom_left_frame, text="Save 💾", command=self.save_button_action
+            self.bottom_left_frame, text="Export 💾", command=self.save_button_action
         )
         self.save_button.grid(row=0, column=2, sticky="nsew")
 
     def save_button_action(self):
         self.save_config()
-        self.load_config()
+        file_path = filedialog.asksaveasfilename(
+            initialdir=settings.CONFIG_FOLDER,
+            title="Export Config File",
+            filetypes=(("TOML files", "*.toml"),),
+        )
+        if file_path:
+            self.save_config(file_path.split(".")[0] + ".toml")
+            messagebox.showinfo("Success", "Config file exported successfully.")
+
         self.update_widgets()
 
     def widgets_save(self):

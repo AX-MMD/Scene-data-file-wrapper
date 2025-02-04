@@ -4,3 +4,4 @@ bin/run_gui.exe
 src/bin/run_gui.exe
 src/configs/config.toml
 src/bin/run_gui.exe
+src/configs/__app__/config.toml

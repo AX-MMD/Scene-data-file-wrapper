@@ -7,13 +7,13 @@ ___
 Author: AX-MMD    
 Docs: https://github.com/AX-MMD/kk-plap-generator/tree/main?tab=readme-ov-file#intro
 
-PLAP generator uses a Timeline interpolable as reference to generate a sequence to use with sound folders. It is meant to sync with a simple movement like forward-backward, up-down, etc. 
+PLAP generator uses a Timeline interpolable as reference to generate a sequence to use with sound components. It is meant to sync with a simple movement like forward-backward, up-down, etc. 
 
 The process is as follows:
 - Export the Timeline Single File of your reference
 - Configure PLAP generator
 - Generate your PLAP files
-- Setup your scene (import `/resources/Plap1234.png` or make your own sound folders)
+- Setup your scene (import `/resources/Plap1234.png` or make your own sound components)
 - Import the generated PLAP files to Timeline
 
 ### EXPORT TIMELINE SINGLE FILE ###############################################
@@ -63,7 +63,7 @@ If the interpolable is not part of a group, you can just use its name (`Pos Wais
 You can click the ` ℹ ` icons for a full explanation of the parameters available to customize or apply corrections to your sequence:
 * A time range other then 00:00.0 -> End Of Scene.
 * A different sound pattern.
-* A different number of sound folders and names.
+* A different number of sound components and names.
 * Adjust the delay or the margin of error accepted to register a sound.
 * (In development) Use multiple reference interpolable.
 
@@ -71,11 +71,11 @@ You can click the ` ℹ ` icons for a full explanation of the parameters availab
 
 ### GENERATE THE PLAP FILES ###################################################
 ___
-Once your have exported your Single File and configured the generator, press the `▶` Play button. The program will generate a file for each name in `Sound Folders`. They will be created to whatever location your exported Single File was in.
+Once your have exported your Single File and configured the generator, press the `▶` Play button. The program will generate a file for each name in `Sound Components`. They will be created to whatever location your exported Single File was in.
 
 The output should be something like this:
 
-    Generating plap for ['Plap1', 'Plap2', 'Plap3', 'Plap4'] with pattern 'V'
+    Generating plap for 'Plap1', 'Plap2', 'Plap3', 'Plap4' with pattern 'V'
     Plap1:: Generated 67 keyframes from time 0.2 to 36.5
     Plap2:: Generated 67 keyframes from time 0.2 to 36.5
     Plap3:: Generated 67 keyframes from time 0.2 to 36.5
@@ -92,12 +92,12 @@ See TROUBLESHOOTING below if you have an issue.
 ___
 > In CharaStudio
 
-With the Plap.xml files generated, it's time to add SFX folders to your scene.
+With the Plap.xml files generated, it's time to add SFX components to your scene.
 You can just import `/resources/Plap1234.png` that is included with this install and skip to the next phase: IMPORT TO TIMELINE.
 
 * Create a folder for each name "plap_names" you defined in config.toml, they need to have the exact same names.
 
-* Fill each folders with 1 or more sound items of your choice, preferably low latency single sound items like (S)Piston. There is a "delay" parameter that you can use in the config if you want to play with sounds that are not instant.
+* Fill each components with 1 or more sound items of your choice, preferably low latency single sound items like (S)Piston. There is a "delay" parameter that you can use in the config if you want to play with sounds that are not instant.
 
 * Each folder is activated in sequence, which will produce whatever combination of sounds you put in there.
 
@@ -105,9 +105,9 @@ You can just import `/resources/Plap1234.png` that is included with this install
 ___
 > In CharaStudio
 
-(If you already have interpolables in Timeline for your sound folders, delete them)
+(If you already have interpolables in Timeline for your sound components, delete them)
 
-For each of your sound folders in your workspace:
+For each of your sound components in your workspace:
 * Click the folder to highlight it.
 * In Timeline -> Single Files, load the corresponding name.
 

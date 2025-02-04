@@ -8,10 +8,23 @@ from kk_plap_generator.generator.plap_generator import (
     PlapGenerator,
     keyframe_get,
 )
+from kk_plap_generator.models import SoundComponentConfig
 
 
 @pytest.fixture
-def plap_generator():
+def sound_components():
+    return [
+        SoundComponentConfig(
+            name=f"Plap{i}",
+            offset=0.0,
+            cutoff=0.0,
+        )
+        for i in range(1, 5)
+    ]
+
+
+@pytest.fixture
+def plap_generator(sound_components):
     return PlapGenerator(
         interpolable_path="path/to/interpolable",
         ref_keyframe_time="00:01.00",
@@ -20,7 +33,7 @@ def plap_generator():
         min_push_in=0.2,
         time_ranges=[("00:00.00", "00:10.00")],
         pattern_string="V",
-        plap_folder_names=["Plap1", "Plap2", "Plap3", "Plap4"],
+        sound_components=sound_components,
         template_path="path/to/template.xml",
     )
 

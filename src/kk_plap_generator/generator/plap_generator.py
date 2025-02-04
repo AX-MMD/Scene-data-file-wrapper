@@ -6,6 +6,8 @@ from typing import Dict, List, Optional, Tuple, Union, cast
 from xml.etree import ElementTree as et
 
 from kk_plap_generator import settings
+from kk_plap_generator.generator.utils import InfiniteIterator
+from kk_plap_generator.models import SoundComponentConfig
 
 
 class PlapGenerator:
@@ -28,8 +30,8 @@ class PlapGenerator:
         Optional list of time ranges for the SFX, each range is a pair of strings (MM:SS.SS).
     pattern_string : str, optional
         The pattern string to generate the plap sequence.
-    plap_folder_names : list of str, optional
-        List of names of the folders to use (Those containing the sound items).
+    sound_components : list of str, optional
+        List of names of the components to use (Those containing the sound items).
         Default is ["Plap1", "Plap2", "Plap3", "Plap4"].
     template_path : str, optional
         Path to the template XML file.
@@ -55,15 +57,20 @@ class PlapGenerator:
 
     def __init__(
         self,
+        # config file params START ###
         interpolable_path: str,
         ref_keyframe_time: str,
+        sound_components: List[SoundComponentConfig],
         offset: float = 0.0,
         min_pull_out: float = 0.2,
         min_push_in: float = 0.8,
         time_ranges: List[Tuple[str, str]] = [],
         pattern_string: str = "V",
-        plap_folder_names: List[str] = ["Plap1", "Plap2", "Plap3", "Plap4"],
         template_path: str = settings.TEMPLATE_FILE,
+        # config file params END ###
+        # GUI params START ###
+        auto_search: bool = True,
+        # GUI params END ###
     ):
         # config file params START ###
         self.interpolable_path = interpolable_path
@@ -79,10 +86,14 @@ class PlapGenerator:
                     f"Invalid pattern {self.pattern_string}, valid characters are {', '.join(self.VALID_PATTERN_CHARS)} or a combination of them."
                 )
 
-        self.plap_names = plap_folder_names
-        self.plap_count = len(plap_folder_names)
+        self.sound_components: List = sound_components
+        self.plap_count = len(sound_components)
         self.template_path = template_path
         # config file params END ###
+
+        # GUI params START ###
+        self.auto_search = auto_search
+        # GUI params END ###
 
         self.patterns: Dict[str, List[int]] = self.get_patterns()
         self.sequence = self.generate_sequence(pattern_string)
@@ -141,7 +152,15 @@ class PlapGenerator:
         sequence = self.generate_sequence(self.pattern_string)
 
         # Get the rythm from source single_file, will use parameters from the config to locate the node
-        interpolable = find_interpolable(timeline_xml_tree, self.interpolable_path)
+        if self.auto_search:
+            interpolable = deep_find_interpolable(
+                list(timeline_xml_tree.getroot()), self.interpolable_path.split(".")[-1]
+            )
+        else:
+            interpolable = find_interpolable(
+                timeline_xml_tree.getroot(), self.interpolable_path
+            )
+
         keyframes = list(interpolable)
 
         # We find the reference keyframe and directionnal information
@@ -150,9 +169,9 @@ class PlapGenerator:
         keyframe_times = self.get_keyframe_times(keyframes, reference)
 
         # Create the plap nodes
-        for i, plap_name in enumerate(self.plap_names):
+        for i, sc in enumerate(self.sound_components):
             plap = copy.deepcopy(base_plap)
-            plap.set("alias", f"{plap_name}")
+            plap.set("alias", f"{sc['name']}")
             plap.set("objectIndex", f"{plap.get('objectIndex')}{i + 1}")
             sfx_node.append(plap)
 
@@ -162,14 +181,22 @@ class PlapGenerator:
         for time in keyframe_times:
             i = next(pattern_iter)
             plap = plaps[i]
+            pc = self.sound_components[i]
             mute_keyframe = copy.deepcopy(base_keyframe)
-            mute_keyframe.set("time", str(time - 0.1 + self.offset))
+            mute_keyframe.set("time", str(time - 0.1 + self.offset + pc["offset"]))
             mute_keyframe.set("value", "false")
             plap.append(mute_keyframe)
             new_keyframe = copy.deepcopy(base_keyframe)
-            new_keyframe.set("time", str(time + self.offset))
+            new_keyframe.set("time", str(time + self.offset + pc["offset"]))
             new_keyframe.set("value", "true")
             plap.append(new_keyframe)
+            if pc["cutoff"] < math.inf:
+                cutoff_keyframe = copy.deepcopy(base_keyframe)
+                cutoff_keyframe.set(
+                    "time", str(time + self.offset + pc["offset"] + pc["cutoff"])
+                )
+                cutoff_keyframe.set("value", "false")
+                plap.append(cutoff_keyframe)
 
         return sfx_node, len(keyframe_times), (keyframe_times[0], keyframe_times[-1])
 
@@ -191,19 +218,15 @@ class PlapGenerator:
                 value = keyframe_get(keyframe, reference.axis)
                 distance = abs(reference.value - value)
                 if did_plap:
+                    # Only re-enable plapping after a minimum distance is reached
                     if (
-                        (
-                            reference.out_direction == 1
-                            and value > reference.value
-                            or reference.out_direction == -1
-                            and value < reference.value
-                        )
-                        and distance
-                        >= self._round(  # # Round to avoid floating point errors
-                            self.min_pull_out * reference.estimated_pull_out
-                        )
+                        reference.out_direction == 1
+                        and value > reference.value
+                        or reference.out_direction == -1
+                        and value < reference.value
+                    ) and distance >= self._round(  # Round to avoid floating point errors
+                        self.min_pull_out * reference.estimated_pull_out
                     ):
-                        # Only re-enable plapping after a minimum distance is reached
                         did_plap = False
                 else:
                     if (
@@ -321,22 +344,6 @@ class PlapGenerator:
         return self._round(float(time))
 
 
-class InfiniteIterator:
-    def __init__(self, data):
-        self.data = data
-        self.index = 0
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        if not self.data:
-            raise StopIteration("The data list is empty.")
-        value = self.data[self.index]
-        self.index = (self.index + 1) % len(self.data)
-        return value
-
-
 def keyframe_get(keyframe: et.Element, key: str) -> float:
     return float(cast(str, keyframe.get(key)))
 
@@ -359,6 +366,9 @@ class KeyframeReference(Keyframe):
     @property
     def value(self):
         return getattr(self, self.axis)
+
+
+notfound = et.Element("notfound")
 
 
 class NodeNotFoundError(Exception):
@@ -390,25 +400,38 @@ class NodeNotFoundError(Exception):
         return s
 
 
-def find_interpolable(tree: et.ElementTree, target: str):
-    node = tree.getroot()
+def deep_find_interpolable(node_list: List[et.Element], target: str):
+    for node in node_list:
+        if node.tag == "interpolable" and node.get("alias") == target:
+            return node
+        else:
+            found = deep_find_interpolable(list(node), target)
+            if found is not None:
+                return found
+
+    return None
+
+
+def find_interpolable(root: et.Element, target: str) -> et.Element:
+    node: et.Element = root
     tag, value, child = convert_string_to_nested_list(target)
     path = []
     while child is not None:
         path.append(value)
-        node = node.find(f"""interpolableGroup[@{tag}='{value}']""")
-        if node is None:
+        node = node.find(f"""interpolableGroup[@{tag}='{value}']""") or notfound
+        if node is notfound:
             raise NodeNotFoundError("interpolableGroup", tag, value, path=".".join(path))
+
         tag, value, child = child
 
-    node = node.find(f"""interpolable[@{tag}='{value}']""")
-    if node is None:
+    node = node.find(f"""interpolable[@{tag}='{value}']""") or notfound
+    if node is notfound:
         raise NodeNotFoundError("interpolable", tag, value)
 
     return node
 
 
-def convert_string_to_nested_list(s):
+def convert_string_to_nested_list(s: str):
     parts = s.split(".")
     nested_list = None
     for part in reversed(parts):
