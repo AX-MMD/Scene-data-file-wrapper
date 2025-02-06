@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, TypedDict
+from typing import List, Tuple, TypedDict
 
 
 class SoundComponentConfig(TypedDict):

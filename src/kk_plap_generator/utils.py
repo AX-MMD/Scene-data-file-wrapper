@@ -45,7 +45,9 @@ def generate_plaps(ref_single_file_path: str, groups: typing.List[PlapGroupConfi
                 print(output[-1])
                 for child in list(sound_component):
                     arr.append(child)
-        output.append("==================================================================")
+        output.append(
+            "=================================================================="
+        )
         print(output[-1])
 
     for sound_component in list(plaps.values()):

@@ -66,7 +66,7 @@ class TimeRangesWidget(PlapWidget):
         selected_index: typing.Tuple[int] = self.time_ranges_listbox.curselection()
         if not selected_index:
             return
-        
+
         start, stop = self.app.store["time_ranges"][selected_index[0]]
 
         dialog = TimeRangeDialog(
@@ -77,7 +77,10 @@ class TimeRangesWidget(PlapWidget):
         )
 
         if dialog.is_valid():
-            self.app.store["time_ranges"][selected_index[0]] = (dialog.start_time, dialog.stop_time)
+            self.app.store["time_ranges"][selected_index[0]] = (
+                dialog.start_time,
+                dialog.stop_time,
+            )
             self.update()
 
     def remove_selected_time_range(self):
@@ -103,7 +106,13 @@ class TimeRangesWidget(PlapWidget):
 
 
 class TimeRangeDialog(simpledialog.Dialog):
-    def __init__(self, parent, title=None, start_time: str="00:00.00", stop_time: str="00:00.00"):
+    def __init__(
+        self,
+        parent,
+        title=None,
+        start_time: str = "00:00.00",
+        stop_time: str = "00:00.00",
+    ):
         self.ok_text = "✔"
         self.cancel_text = "✖"
         self.start_time = start_time
