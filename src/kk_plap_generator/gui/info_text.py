@@ -39,30 +39,33 @@ There are only two required info for a default generation of a sequence: The nam
 > In PLAP generator
 * The generator needs the Path and Time of the interpolable to use as reference.
 
-If the interpolable is part of a group, here is an exemple:
+    Exemple:
 
     Your interpolable "Pos Waist" is part of a group(s), and the reference keyframe is at 00:02.454
-    __________
+     __________
     |  Main    |
     ------------
     |   male   |      "00:02.454"
     ------------      ⇓
-      |Pos Waist|    ◆◆◆ ◆◆◆ ◆◆◆       ◆◆ ◆◆ ◆◆◆◆◆◆
+     |Pos Waist|    ◆◆◆ ◆◆◆ ◆◆◆       ◆◆ ◆◆ ◆◆◆◆◆◆
       ---------
 
-    Path = Main.male.Pos Waist
+    Path = Pos Waist
     Time = 00:02.454
 
-If the interpolable is not part of a group, you can just use its name (`Pos Waist` in the exemple above).
+If the generator has trouble finding the reference keyframe try giving the full path, Main.male.Pos Waist for this exemple. You can check the TROUBLESHOOTING section for more help.
 
 [-- Advanced use case ------------------------------------------------------]
 
-You can click the ` ℹ ` icons for a full explanation of the parameters available to customize or apply corrections to your sequence:
+You can click the ` ℹ ` icons for a full explanation of the parameters available to customize or apply corrections to your sound sequence:
+
+* Use multiple reference interpolable.
 * A time range other then 00:00.0 -> End Of Scene.
 * A different sound pattern.
-* A different number of sound components and names.
-* Adjust the delay or the margin of error accepted to register a sound.
-* (In development) Use multiple reference interpolable.
+* A different number of sound components and custom names.
+* Add a `cutoff` to `Sound Components` if you want to use a "loop" sound item.
+* Offset the timing of the sound compared to the reference.
+* Adjust the margin of error accepted to register a sound.
 
 [---------------------------------------------------------------------------]
 
@@ -72,16 +75,13 @@ Once your have exported your Single File and configured the generator, press the
 
 The output should be something like this:
 
-    Generating plap for 'Plap1', 'Plap2', 'Plap3', 'Plap4' with pattern 'V'
-    Plap1:: Generated 67 keyframes from time 0.2 to 36.5
-    Plap2:: Generated 67 keyframes from time 0.2 to 36.5
-    Plap3:: Generated 67 keyframes from time 0.2 to 36.5
-    Plap4:: Generated 67 keyframes from time 0.2 to 36.5
-    Generated 'path/to/your/files/Timeline/Single Files/Plap1.xml'
-    Generated 'path/to/your/files/Timeline/Single Files/Plap2.xml'
-    Generated 'path/to/your/files/Timeline/Single Files/Plap3.xml'
-    Generated 'path/to/your/files/Timeline/Single Files/Plap4.xml'
-    Press Enter to exit...
+    Generating plap for (Plap2 Plap1 Plap3 Plap4)
+    Using pattern 'V'
+    Plap1:: Generated 39 keyframes from time 5.95 to 27.05
+    Plap2:: Generated 39 keyframes from time 5.95 to 27.05
+    Plap3:: Generated 39 keyframes from time 5.95 to 27.05
+    Plap4:: Generated 39 keyframes from time 5.95 to 27.05
+    ================================================================
 
 See TROUBLESHOOTING below if you have an issue.
 
@@ -89,14 +89,11 @@ See TROUBLESHOOTING below if you have an issue.
 ___
 > In CharaStudio
 
-With the Plap.xml files generated, it's time to add SFX components to your scene.
-You can just import `/resources/Plap1234.png` that is included with this install and skip to the next phase: IMPORT TO TIMELINE.
+With the Plap.xml files generated, it's time to add SFX components to your scene. You can just import `/resources/Plap1234.png` that is included with this install and skip to the next phase: IMPORT TO TIMELINE.
 
-* Add a sound item or create a folder containing sound items for each name you defined for "sound_components" in config.toml, preferably with the same names.
+* Add a sound item or create a folder containing sound items for each name you defined for `Sound Components`, doesn't need to be the same names.
 
-* Preferably low latency single sound items like (S)Piston should be used. There is an "offset" parameter that you can use in the config if you want to adjust the timing of the sound.
-
-* Each sound component is activated in sequence.
+* Each sound component is activated in sequence, following the sound pattern.
 
 ### IMPORT TO TIMELINE ########################################################
 ___
@@ -121,6 +118,10 @@ The reference can be lost if the subject of that interpolable:
 
 ### TROUBLESHOOTING ###########################################################
 ___
+
+Could not find the reference keyframe at ...
+* Make sure you gave the correct time for the reference keyframe.
+
 There are keyframes for only a part of the scene, then it stop :
 * Most likely the subject moved from his position to much, you can try decreasing Min Pull Out and/or Min Push In.
 
@@ -135,21 +136,18 @@ Missing node: `<interpolable alias='xxx'>`
 * An interpolable with the given name was not found. Make sure it is correct and that you renamed it in your scene before you exported it to Single File.
 * Modded CharaStudio auto-translates, look at your Timeline and press Alt+T to see the real names of the groups and interpolables.
 
-Could not find the reference keyframe at ...
-* Make sure you gave the correct time for the reference keyframe.
-
 Could not find the ... file
-* PLAP generator cannot access `/configs` and `/resources`, or `config.toml` and `template.xml` that is supposed to be there.
+* PLAP generator cannot access `/configs` and `/resources`, or `config.toml` and `template.xml` that is supposed to be in these folders. Re-install the program.
 
 """
 
 CORRECTIONS = """
 [---------------------------- Adjustments ---------------------------]
 
-These settings are only used for corrections, only change them if there is to much plaps, not enough plaps, or the plaps are not synced with the reference.
+These settings are used for corrections. You can change them if the plaps are not synced with the reference, there is to much plaps, or not enough plaps.
 
 ::: Offset :::
-Offset in seconds, in case you don't want the sfx to be timed exactly with the reference keyframes. Can be positive or negative.
+A global offset in seconds for all Sound Components of the current page, in case you don't want the sfx to be timed exactly with the reference keyframes. Can be positive or negative.
 
 ::: Minimum Pull Out % :::
 The generator estimates the distance traveled by the subject for each plap, here you can set what (%) of that distance the subject needs to pull away from the contact point before re-enabling plaps.
@@ -166,7 +164,13 @@ SOUND_FOLDERS = """
 [--------------------------- Customization --------------------------]
 
 ::: Sound Components :::
-Here you tell the generator what are the names of your sound components in Charastudio (componentscontaining your sound items).
+Here you define your sound components preferably 1 per sound item or folder you setup in Charastudio.
+
+Double-Click on the name to edit the parameters of the sound component.
+
+:Name: The name of the sound component, this will the name of its corresponding plap file and interpolable in Timeline.
+:Offset: A custom offset in seconds for this sound component, can be positive or negative.
+:Cutoff: You can use this to define when the sound should stop playing, usefull if you want to use "loop" sound items.
 """
 
 SOUND_PATTERN = """
@@ -193,6 +197,8 @@ TIME_RANGES = """
 ::: Time Ranges :::
 By default the generator will try to make keyframes starting from 00:00.00.
 You can have a different start point, end point or multiple ranges.
+
+Double-Click on the time range to edit the parameters.
 
 For exemple, if you give the ranges 00:01.5, 00:05.0 and 00:10.5, 00:15.0 the generator will try to make keyframes only at those points.
 

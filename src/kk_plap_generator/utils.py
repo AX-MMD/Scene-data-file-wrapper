@@ -22,9 +22,9 @@ def generate_plaps(ref_single_file_path: str, groups: typing.List[PlapGroupConfi
 
     for group in groups:
         plap_generator = PlapGenerator(**group)
-        names = (f"'{sc['name']}'" for sc in plap_generator.sound_components)
+        names = (f"{sc['name']}" for sc in plap_generator.sound_components)
         output.append(
-            f"Generating plap for {', '.join(names)} with pattern '{plap_generator.pattern_string}'"
+            f"Generating plap for ({' '.join(names)})\nUsing pattern '{plap_generator.pattern_string}'"
         )
         print(output[-1])
         sfx_node, frame_count, first_last_frames = plap_generator.generate_plap_xml(
@@ -45,6 +45,8 @@ def generate_plaps(ref_single_file_path: str, groups: typing.List[PlapGroupConfi
                 print(output[-1])
                 for child in list(sound_component):
                     arr.append(child)
+        output.append("==================================================================")
+        print(output[-1])
 
     for sound_component in list(plaps.values()):
         tree = et.ElementTree(et.Element("root"))
