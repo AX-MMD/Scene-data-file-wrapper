@@ -35,6 +35,7 @@ class TimeRangesWidget(PlapWidget):
 
         self.time_ranges_listbox = tk.Listbox(self.time_ranges_frame)
         self.time_ranges_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.time_ranges_listbox.bind("<Double-Button-1>", self.edit_time_range)
 
         self.time_ranges_scrollbar = tk.Scrollbar(
             self.time_ranges_frame, orient="vertical"
@@ -61,20 +62,37 @@ class TimeRangesWidget(PlapWidget):
         for start, stop in self.app.store.get("time_ranges", []):
             self.time_ranges_listbox.insert(tk.END, f"{start} - {stop}")
 
+    def edit_time_range(self, event):
+        selected_index: typing.Tuple[int] = self.time_ranges_listbox.curselection()
+        if not selected_index:
+            return
+        
+        start, stop = self.app.store["time_ranges"][selected_index[0]]
+
+        dialog = TimeRangeDialog(
+            self.masterframe,
+            title="Edit Time Range",
+            start_time=start,
+            stop_time=stop,
+        )
+
+        if dialog.is_valid():
+            self.app.store["time_ranges"][selected_index[0]] = (dialog.start_time, dialog.stop_time)
+            self.update()
+
     def remove_selected_time_range(self):
         selected_index = self.time_ranges_listbox.curselection()
         if selected_index:
-            selected_time_range = self.time_ranges_listbox.get(selected_index)
+            selected_time_range: str = self.time_ranges_listbox.get(selected_index)
             start, stop = selected_time_range.split(" - ")
             self.app.store["time_ranges"].remove((start, stop))
             self.update()
 
     def add_time_range(self):
-        dialog = CustomDialog(self.masterframe, title="Add Time Range")
-        result = dialog.result
-        if result:
-            start_time = result["start_time"]
-            stop_time = result["stop_time"]
+        dialog = TimeRangeDialog(self.masterframe, title="Add Time Range")
+        if dialog.is_valid():
+            start_time = dialog.start_time
+            stop_time = dialog.stop_time
             if validate_time(start_time) and validate_time(stop_time):
                 self.app.store["time_ranges"].append((start_time, stop_time))
                 self.update()
@@ -84,23 +102,25 @@ class TimeRangesWidget(PlapWidget):
                 )
 
 
-class CustomDialog(simpledialog.Dialog):
-    def __init__(self, parent, title=None):
+class TimeRangeDialog(simpledialog.Dialog):
+    def __init__(self, parent, title=None, start_time: str="00:00.00", stop_time: str="00:00.00"):
         self.ok_text = "✔"
         self.cancel_text = "✖"
+        self.start_time = start_time
+        self.stop_time = stop_time
         super().__init__(parent, title)
 
     def body(self, master):
         tk.Label(master, text="Start Time").grid(row=0, column=0)
         self.start_time_entry = tk.Entry(master, justify="center")
         self.start_time_entry.grid(row=0, column=1)
-        self.start_time_entry.insert(0, "00:00.00")
+        self.start_time_entry.insert(0, self.start_time)
         tk.Label(master, text="MM:SS.SS").grid(row=0, column=2)
 
         tk.Label(master, text="Stop Time").grid(row=1, column=0)
         self.stop_time_entry = tk.Entry(master, justify="center")
         self.stop_time_entry.grid(row=1, column=1)
-        self.stop_time_entry.insert(0, "00:00.00")
+        self.stop_time_entry.insert(0, self.stop_time)
         tk.Label(master, text="MM:SS.SS").grid(row=1, column=2)
 
         return self.start_time_entry  # initial focus
@@ -127,8 +147,9 @@ class CustomDialog(simpledialog.Dialog):
 
         box.pack()
 
+    def is_valid(self):
+        return validate_time(self.start_time) and validate_time(self.stop_time)
+
     def apply(self):
-        self.result = {
-            "start_time": self.start_time_entry.get(),
-            "stop_time": self.stop_time_entry.get(),
-        }
+        self.start_time = self.start_time_entry.get()
+        self.stop_time = self.stop_time_entry.get()

@@ -4,7 +4,7 @@ from typing import List, Optional, Tuple, TypedDict
 class SoundComponentConfig(TypedDict):
     name: str
     offset: float
-    cutoff: Optional[float]
+    cutoff: float
 
 
 class PlapGroupConfig(TypedDict):

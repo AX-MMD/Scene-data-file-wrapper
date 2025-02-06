@@ -38,6 +38,7 @@ class SoundComponentsWidget(PlapWidget):
 
         self.sound_components_listbox = tk.Listbox(self.sound_components_frame)
         self.sound_components_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.sound_components_listbox.bind("<Double-Button-1>", self.edit_sound_component)
 
         self.sound_components_scrollbar = tk.Scrollbar(
             self.sound_components_frame, orient="vertical"
@@ -54,47 +55,75 @@ class SoundComponentsWidget(PlapWidget):
         self.update()
 
         self.add_sound_component_name_button = tk.Button(
-            self.sound_components_frame, text="+", command=self.add_sound_component_name
+            self.sound_components_frame, text="+", command=self.add_sound_component
         )
         self.add_sound_component_name_button.pack(fill=tk.X)
 
         self.remove_sound_component_name_button = tk.Button(
             self.sound_components_frame,
             text="-",
-            command=self.remove_selected_sound_component_name,
+            command=self.remove_selected_sound_component,
         )
         self.remove_sound_component_name_button.pack(fill=tk.X)
 
     def update(self):
         self.sound_components_listbox.delete(0, tk.END)
         for sc in self.app.store["sound_components"]:
-            offset_str = f"  ({'+' if sc['offset'] >= 0 else ''}{sc['offset']}s)"
-            cutoff_str = f"(stop:{sc['cutoff']}s)" if sc["cutoff"] != math.inf else ""
+            offset_str = f"  ({'+' if sc['offset'] >= 0 else '-'}{abs(sc['offset'])}s)"
+            cutoff_str = f"(end:{sc['cutoff']}s)" if sc["cutoff"] != math.inf else ""
             self.sound_components_listbox.insert(
                 tk.END, f"{sc['name']}{offset_str}{cutoff_str}"
             )
 
-    def add_sound_component_name(self):
-        dialog = CustomDialog(self.masterframe, title="Add Sound Component")
+    def edit_sound_component(self, event):
+        selected_index = self.sound_components_listbox.curselection()
+        if not selected_index:
+            return
+
+        index: int = selected_index[0]
+        component = self.app.store["sound_components"][index]
+
+        dialog = SoundComponentDialog(
+            self.masterframe,
+            title="Edit Sound Component",
+            name=component["name"],
+            offset=component["offset"],
+            cutoff=component["cutoff"],
+        )
+
+        if dialog.is_valid():
+            component["name"] = dialog.name
+            component["offset"] = dialog.offset
+            component["cutoff"] = dialog.cutoff
+            self.update()
+
+    def add_sound_component(self):
+        dialog = SoundComponentDialog(self.masterframe, title="Add Sound Component")
         sound_component = SoundComponentConfig(
             name=dialog.name, offset=dialog.offset, cutoff=dialog.cutoff
         )
         self.app.store["sound_components"].append(sound_component)
         self.update()
 
-    def remove_selected_sound_component_name(self):
+    def remove_selected_sound_component(self):
         selected_index = self.sound_components_listbox.curselection()
-        print(selected_index)
         if selected_index:
             self.app.store["sound_components"].pop(selected_index[0])
             self.update()
 
 
-class CustomDialog(simpledialog.Dialog):
-    def __init__(self, parent, title=None):
-        self.name = ""
-        self.offset = 0.0
-        self.cutoff = math.inf
+class SoundComponentDialog(simpledialog.Dialog):
+    def __init__(
+        self,
+        parent,
+        title=None,
+        name: str = "",
+        offset: float = 0.0,
+        cutoff: float = math.inf,
+    ):
+        self.name = name
+        self.offset = offset or 0.0  # get rid of -0.0
+        self.cutoff = cutoff
         self.ok_text = "✔"
         self.cancel_text = "✖"
         super().__init__(parent, title)
@@ -102,17 +131,20 @@ class CustomDialog(simpledialog.Dialog):
     def body(self, master):
         tk.Label(master, text="Name:").grid(row=0)
         tk.Label(master, text="Offset (sec):").grid(row=1)
-        tk.Label(master, text="Duration:").grid(row=2)
+        tk.Label(master, text="Cutoff (sec):").grid(row=2)
 
         self.name_entry = tk.Entry(master)
         self.name_entry.grid(row=0, column=1)
 
         self.offset_entry = tk.Entry(master)
         self.offset_entry.grid(row=1, column=1)
-        self.offset_entry.insert(0, "0.0")
 
         self.cutoff_entry = tk.Entry(master)
         self.cutoff_entry.grid(row=2, column=1)
+
+        self.name_entry.insert(0, self.name)
+        self.offset_entry.insert(0, str(self.offset))
+        self.cutoff_entry.insert(0, str(self.cutoff if self.cutoff != math.inf else ""))
 
         return self.name_entry  # initial focus
 
@@ -137,6 +169,9 @@ class CustomDialog(simpledialog.Dialog):
         self.bind("<Escape>", self.cancel)
 
         box.pack()
+
+    def is_valid(self):
+        return self.name != ""
 
     def apply(self):
         self.name = self.name_entry.get()
