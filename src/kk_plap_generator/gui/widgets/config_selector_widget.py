@@ -1,7 +1,5 @@
-import os
 import tkinter as tk
-from tkinter import messagebox
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 
 from kk_plap_generator import settings
 from kk_plap_generator.gui.widgets.base import PlapWidget
@@ -22,7 +20,7 @@ class ConfigSelectorWidget(PlapWidget):
         file_path = filedialog.askopenfilename(
             initialdir=settings.CONFIG_FOLDER,
             title="Select Config File",
-            filetypes=(("TOML files", "*.toml"), ("All files", "*.*"))
+            filetypes=(("TOML files", "*.toml"), ("All files", "*.*")),
         )
         if file_path:
             self.load_selected_config(file_path)

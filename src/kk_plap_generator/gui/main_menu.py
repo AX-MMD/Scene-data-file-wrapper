@@ -1,8 +1,7 @@
 import os
 import tkinter as tk
-from tkinter import filedialog
 import traceback
-from tkinter import font, messagebox
+from tkinter import filedialog, font, messagebox
 from typing import List, Optional
 
 import tkinterdnd2
@@ -166,7 +165,7 @@ class PlapUI(tk.Frame):
 
         # Load Button
         self.config_loader_widget = ConfigSelectorWidget(self, self.bottom_left_frame)
-        
+
         # Generate Button
         self.generate_button = tk.Button(
             self.bottom_left_frame, text="▶", fg="green", command=self.generate_plaps
